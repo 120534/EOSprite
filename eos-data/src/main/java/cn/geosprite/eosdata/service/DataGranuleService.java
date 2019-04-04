@@ -1,6 +1,6 @@
 package cn.geosprite.eosdata.service;
 
-import cn.geosprite.eosdata.dao.SceneRepository;
+import cn.geosprite.eosdata.dao.DataGranuleRepository;
 import cn.geosprite.eosdata.entity.DataGranule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,11 +18,11 @@ import javax.transaction.Transactional;
 public class DataGranuleService {
 
     @Autowired
-    private SceneRepository sceneRepository;
+    private DataGranuleRepository dataGranuleRepository;
 
     @Transactional
     public void save(DataGranule dataGranule) {
-        sceneRepository.save(dataGranule);
+        dataGranuleRepository.save(dataGranule);
     }
 
 }

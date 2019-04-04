@@ -11,6 +11,6 @@ import org.springframework.stereotype.Repository;
  * @ Modified By：
  */
 @Repository
-public interface SceneRepository extends CrudRepository<DataGranule,String> {
+public interface DataGranuleRepository extends CrudRepository<DataGranule, String> {
 
 }
