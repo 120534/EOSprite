@@ -104,6 +104,22 @@
             <version>2.6</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-compress -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
+            <version>1.18</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.rauschig/jarchivelib -->
+        <!--unzip tar.gz-->
+        <dependency>
+            <groupId>org.rauschig</groupId>
+            <artifactId>jarchivelib</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
+
     </dependencies>
 
     <build>

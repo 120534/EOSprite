@@ -1,5 +1,4 @@
-package cn.geosprite.eosprocess.service
-
+package cn.geosprite.eosdata.service
 
 import org.springframework.stereotype.Service
 
@@ -16,6 +15,8 @@ class LasrcService {
      */
 
   def doLasrc(inputPath: String):String = {
+
+    val inputPrefix = ""
 
     val dataName = inputPath.split("/").last
 

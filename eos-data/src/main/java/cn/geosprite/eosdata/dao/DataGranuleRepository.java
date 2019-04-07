@@ -1,16 +1,18 @@
 package cn.geosprite.eosdata.dao;
 
 import cn.geosprite.eosdata.entity.DataGranule;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-/**
- * @ Author     ：wanghl
- * @ Date       ：Created in 9:42 2019-4-3
- * @ Description：None
- * @ Modified By：
- */
+import java.util.Collection;
+import java.util.List;
+
+
 @Repository
-public interface DataGranuleRepository extends CrudRepository<DataGranule, String> {
+public interface DataGranuleRepository extends JpaRepository<DataGranule, String> {
+
+    DataGranule findDataGranuleByDataGranuleId(String dataGranuleId);
 
 }
+

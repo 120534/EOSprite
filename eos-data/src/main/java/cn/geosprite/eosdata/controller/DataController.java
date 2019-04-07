@@ -1,7 +1,7 @@
 package cn.geosprite.eosdata.controller;
 
 import cn.geosprite.eosdata.entity.DataGranule;
-import cn.geosprite.eosdata.service.DataGranuleService;
+import cn.geosprite.eosdata.service.impl.DataServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,8 +19,13 @@ import java.sql.Date;
 @RequestMapping("/data")
 public class DataController {
 
+
+    private final DataServiceImpl dataService;
+
     @Autowired
-    private DataGranuleService dataGranuleService;
+    public DataController(DataServiceImpl dataService){
+        this.dataService = dataService;
+    }
 
     @RequestMapping("/save")
     @ResponseBody
@@ -38,7 +43,7 @@ public class DataController {
         dataGranule.setDataGranulePath("117/050/LC81170502019027LGN00.tgz");
         dataGranule.setDataGranuleUri(null);
 
-        dataGranuleService.save(dataGranule);
+        dataService.save(dataGranule);
         return dataGranule;
     }
 }
