@@ -1,10 +1,6 @@
-package cn.geosprite.eosdata.service
+package cn.geosprite.eosdata.utils
 
-import org.springframework.stereotype.Service
-
-
-@Service
-class LasrcService {
+object LasrcService {
 
     /**
      * description: 这个service用来进行大气校正，需要两个参数，输入和输出路径。在demo里面先自定义输出路径。
@@ -14,13 +10,9 @@ class LasrcService {
      * @return _root_.scala.Predef.String
      */
 
-  def doLasrc(inputPath: String):String = {
-
-    val inputPrefix = ""
+  def doLasrc(inputPath: String, outputPath:String):String = {
 
     val dataName = inputPath.split("/").last
-
-    val outputPath = s"/home/hadoop/sr/$dataName"
 
     val cmd = "docker run " +
       s"-v $inputPath:/mnt/input-dir:ro " +
