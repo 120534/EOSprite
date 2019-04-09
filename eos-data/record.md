@@ -2,7 +2,7 @@
 
 数据路径：
     1.本地landasat8原始数据 lc8/raw/ + /path/row/filename
-    2.解压后数据路径 lc8/unzipped/
+    2.解压后数据路径 lc8/dir/
     3.大气校正后数据路径 lc8/sr/
     4.计算ndvi后数据路径 lc8/ndvi/
 
@@ -20,11 +20,15 @@ Lasrc步骤
     1.判断source是否为本地(目前只考虑本地数据情况)。
     2.判断其formatCode，是否需要解压，如果是tgz就需要调用tgz的方法进行解压缩到指定路径(根据读取路径进行调整),
       解压后的路径根据原路径进行更改。
-      `由于解压信息没有体现在ID中,解压后修改内容包括：
+      由于解压信息没有体现在ID中,解压后修改内容包括：
       dataGranuleId,productCode,formatCode,dataPath,四部分
       
-      `
+
       在将这些解压后的数据存储到本地，同时在DataGranule表中写入数据信息。
-    
-    
     3.读取数据路径，执行Lasrc，
+    
+    还需要注意的是，解压后的，还需要修改orderGranule的data_granule_id
+    
+    
+    
+    

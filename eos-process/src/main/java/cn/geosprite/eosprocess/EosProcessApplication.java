@@ -9,5 +9,4 @@ public class EosProcessApplication {
     public static void main(String[] args) {
         SpringApplication.run(EosProcessApplication.class, args);
     }
-
 }

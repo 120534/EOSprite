@@ -43,8 +43,7 @@ public class DataServiceImpl implements DataService {
 
     @Override
     public void save(DataGranule dataGranule) {
-        dataGranuleRepository.save(dataGranule);
-    }
+        dataGranuleRepository.save(dataGranule); }
 
     @Override
     public Page<DataGranule> findAll(Pageable pageable) {

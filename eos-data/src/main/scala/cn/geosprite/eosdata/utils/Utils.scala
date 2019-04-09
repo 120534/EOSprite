@@ -22,7 +22,9 @@ object Utils {
   def pathUpdate (string: String,format: String): String ={
     val strArray = string.split("/")
     strArray.update(0,format)
+    if (string.contains("tgz")){
     strArray.update(strArray.length-1,strArray.last.substring(0,strArray.last.length-4))
+    }
     strArray.mkString("/")
   }
   
@@ -35,10 +37,29 @@ object Utils {
    */
   def idUpdate(string: String, format: String): String = {
     val seq = string.split("/")
-    seq.update(1,seq(1).concat("_" + format.toUpperCase))
+    if (seq(1).split("_").length == 3) {
+      seq.update(1, seq(1).concat("_" + format.toUpperCase))
+    }else {
+      //LC08/L1TP_C1_T1_dir/117050/2018-09-21 -> LC08/L1TP_C1_T1_sr/117050/2018-09-21
+
+      val seq1 = seq(1).split("_")
+      val seq2 = seq1.take(seq1.length - 1).mkString("_")
+
+      seq.update(1, seq2.concat("_" + format.toUpperCase))
+    }
     seq.mkString("/")
   }
 
+  //L1TP_C1_T1 -> L1TP_C1_T1_DIR
+  //L1TP_C1_T1_DIR -> L1TP_C1_T1_SR
+  def productCodeUpdate(string: String, format: String): String = {
+    val seq = string.split("_")
+    if(seq.length != 3){
+      seq.take(seq.length - 1).mkString("_").concat("_" + format.toUpperCase)
+    }else{
+      string.concat("_" + format.toUpperCase)
+    }
+  }
   /**
     * 将不同类型的dataGranule进行转换，
     * 需要重新设置四个信息，分别是data_granule_id，product_code，format_code，data_granule_path
@@ -46,28 +67,25 @@ object Utils {
     * 示例： tgz 类型dataGranule_tgz 转换为dir
     *        convertDataGranule()
     *
-    * @param dataGranule
+    * @param dataGranule,FormatCode
     * @param targetType
     * @return
     */
-  def convertDataGranule(dataGranule: DataGranule, targetType: String): DataGranule ={
+  def convertDataGranule(dataGranule: DataGranule, targetType: FormatCode): DataGranule ={
 
     val id = dataGranule.getDataGranuleId
-
     val path = dataGranule.getDataGranulePath
+    val productCode = dataGranule.getProductCode
 
-    //需要用到原来dataGranule的信息
-    val enum = FormatCode.fromTypeName(targetType)
-
-    val fc  = enum.getFormat
-    val dgi:String = idUpdate(id, enum.getFormat)
+    val fc  = targetType.getFormat
+    val dgi:String = idUpdate(id, targetType.getFormat)
     val uri:String = dataGranule.getDataGranuleUri
     val ds = dataGranule.getDataSource
-    val pc = dataGranule.getProductCode
+    val pc = productCodeUpdate(productCode, targetType.getFormat)
     val sd = dataGranule.getSceneDate
     val sc = dataGranule.getSensorCode
     val tc = dataGranule.getTileCode
-    val dp = pathUpdate(path, enum.getFormat)
+    val dp = pathUpdate(path, targetType.getFormat)
 
     val converted = new DataGranule(dgi,sc,pc,tc,sd,fc,ds,dp,uri)
     converted

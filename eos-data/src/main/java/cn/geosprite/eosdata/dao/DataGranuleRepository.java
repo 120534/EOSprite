@@ -14,5 +14,7 @@ public interface DataGranuleRepository extends JpaRepository<DataGranule, String
 
     DataGranule findDataGranuleByDataGranuleId(String dataGranuleId);
 
+    List<DataGranule> findDataGranulesByDataGranuleId(List<String> dataGranuleIds);
+
 }
 

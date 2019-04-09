@@ -14,12 +14,16 @@ import java.util.List;
 public interface ProcessService {
 
     //返回值还需要考虑如何设置，返回成功与否的信息，以及处理后的数据信息
-    String doLasrc(Integer orderId);
+    List<DataGranule> doLasrc(List<DataGranule> dirList);
 
     //unzip data
 
     List<DataGranule> unzip(List<DataGranule> tgzList);
 
+    List<DataGranule> doNdvi(List<DataGranule> srList);
+
     DataGranule downloadData(DataGranule data);
+
+
 
 }

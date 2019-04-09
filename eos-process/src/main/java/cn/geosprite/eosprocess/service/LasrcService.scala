@@ -21,6 +21,7 @@ class LasrcService {
 
     val outputPath = s"/home/hadoop/sr/$dataName"
 
+
     val cmd = "docker run " +
       s"-v $inputPath:/mnt/input-dir:ro " +
       s"-v $outputPath:/mnt/output-dir:rw -v /mnt/disk1/LaSRC:/mnt/lasrc-aux:ro " +

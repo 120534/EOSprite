@@ -4,14 +4,14 @@ import cn.geosprite.eosdata.config.Configs;
 import cn.geosprite.eosdata.entity.DataGranule;
 import cn.geosprite.eosdata.enums.FormatCode;
 import cn.geosprite.eosdata.service.ProcessService;
+import cn.geosprite.eosdata.utils.LasrcService;
 import cn.geosprite.eosdata.utils.Utils;
+import cn.geosprite.eosprocess.service.BandMathService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @ Author     ：wanghl
@@ -24,38 +24,45 @@ public class ProcessServiceImpl implements ProcessService {
 
     private DataServiceImpl dataService;
     private Configs configs;
+    private BandMathService bandMathService;
 
     @Autowired
-    public ProcessServiceImpl(DataServiceImpl dataService, Configs configs){
+    public ProcessServiceImpl(DataServiceImpl dataService, Configs configs, BandMathService bandMathService){
         this.dataService = dataService;
         this.configs = configs;
+        this.bandMathService = bandMathService;
     }
 
     @Override
-    public String doLasrc(Integer orderId) {
+    public List<DataGranule> doLasrc(List<DataGranule> dataGranules) {
 
-        List<DataGranule> dataGranules = dataService.findDataGranulesByOrderId(orderId);
+        //返回已经做过大气校正的dataGranule信息
+        List<DataGranule> srDataGranules = new ArrayList<>();
 
-        String[] msg;
+        //确保所有数据都在本地且已经解压
+        List<DataGranule> dirDataGranule = unzip(dataGranules);
 
-        List<DataGranule> dirDataGranules = new ArrayList<>();
+        for (DataGranule dataGranule: dirDataGranule){
 
-        //确保所有数据都在本地
-        List<DataGranule> unzip = unzip(dirDataGranules);
+            //如果ID里面不包含SR，则需要进行大气校正
+            if (!dataGranule.getDataGranuleId().contains("SR")){
+                //大气校正的输入路径
+                String inputPath = configs.inputPath + dataGranule.getDataGranulePath();
 
-        //map中每个entity对应，lasrc的输入和输出路径，lasrc(key，value)
-        Map<String ,String> pathMap = new HashMap<>();
+                //进行大气校正
+                LasrcService.doLasrc(inputPath);
 
-        for (DataGranule dataGranule: unzip){
+                //大气校正后的数据信息入库
+                dataGranule = Utils.convertDataGranule(dataGranule, FormatCode.SR);
+                dataService.save(dataGranule);
 
-            String inputPath = configs.inputPath + dataGranule.getDataGranulePath();
-
-            //这里需要提供
-            String outputPath = configs.outputPath + dataGranule.getDataGranulePath();
-
+                srDataGranules.add(dataGranule);
+            }else{
+                //数据已经做过大气校正, 直接添加到list
+                srDataGranules.add(dataGranule);
+            }
         }
-
-        return null;
+        return srDataGranules;
     }
 
     /**
@@ -75,6 +82,7 @@ public class ProcessServiceImpl implements ProcessService {
          *      二.如果不是tgz格式（则为unzipped），进行本地数据读取。
          *
          */
+        List<DataGranule> dir = new ArrayList<>();
 
         for (DataGranule dataGranule: tgzList){
             //获取dataGranul里面可能需要修改的信息
@@ -94,16 +102,42 @@ public class ProcessServiceImpl implements ProcessService {
                     Utils.unzip(inputPath, outPath);
 
                     //解压后的数据信息入库
-                    dataGranule = Utils.convertDataGranule(dataGranule,"dir");
+                    dataGranule = Utils.convertDataGranule(dataGranule, FormatCode.DIR);
                     dataService.save(dataGranule);
+                    dir.add(dataGranule);
+                }else {
+                    //如果没有被压缩，直接放入list返回。
+                    dir.add(dataGranule);
                 }
             }else {
                 //后期补充
-                downloadData(dataGranule);
+                DataGranule dataGranule1 = downloadData(dataGranule);
+                dir.add(dataGranule);
             }
         }
-            return tgzList;
+            return dir;
         }
+
+    @Override
+    public List<DataGranule> doNdvi(List<DataGranule> srList) {
+        List<DataGranule> ndviDataGranules = new ArrayList<>();
+
+        //确保数据都做过大气校正
+        List<DataGranule> list = doLasrc(srList);
+
+        for (DataGranule dataGranule: list) {
+            if (!dataGranule.getFormatCode().equalsIgnoreCase(FormatCode.NDVI.getFormat())){
+                String inputPath = configs.inputPath + dataGranule.getDataGranulePath();
+                bandMathService.getNdvi(inputPath);
+                dataGranule = Utils.convertDataGranule(dataGranule,FormatCode.NDVI);
+                dataService.save(dataGranule);
+                ndviDataGranules.add(dataGranule);
+            }else {
+                ndviDataGranules.add(dataGranule);
+            }
+        }
+        return ndviDataGranules;
+    }
 
     /**
      * 预留接口，判断URI是否为空，提供数据下载到本地，同时写入数据库。
@@ -114,6 +148,5 @@ public class ProcessServiceImpl implements ProcessService {
     public DataGranule downloadData(DataGranule data) {
         return null;
     }
-
 
 }

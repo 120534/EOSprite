@@ -14,7 +14,8 @@ public enum FormatCode implements CodeEnum {
     TGZ("tgz","raw/","L1TP_C1_T1"),
     //DIR means unzipped
     DIR("dir","dir/","L1TP_C1_T1_DIR"),
-    SR("sr","sr/","L1TP_C1_T1_SR")
+    SR("sr","sr/","L1TP_C1_T1_SR"),
+    NDVI("ndvi","ndvi/","L1TP_C1_T1_NDVI")
     ;
 
     private String format;

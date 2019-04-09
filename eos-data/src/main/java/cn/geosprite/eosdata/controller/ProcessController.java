@@ -30,13 +30,29 @@ public class ProcessController {
     }
 
     /**
-     * 测试数据解压缩
+     * 测试数据解压缩，以及数据入库。 测试ok
      */
     @GetMapping("/unzip")
-    public DataGranule dataUnzip(@RequestParam Integer orderId){
+    public DataGranule unzip(@RequestParam Integer orderId){
       List<DataGranule> dataGranuleList  = dataService.findDataGranulesByOrderId(orderId);
       List<DataGranule> unzippedDataGranule = processService.unzip(dataGranuleList);
 
       return unzippedDataGranule.get(0);
+    }
+
+    @GetMapping("/lasrc")
+    public DataGranule lasrc(@RequestParam Integer orderId){
+        List<DataGranule> dataGranuleList  = dataService.findDataGranulesByOrderId(orderId);
+        List<DataGranule> unzippedDataGranule = processService.doLasrc(dataGranuleList);
+
+        return unzippedDataGranule.get(0);
+    }
+
+    @GetMapping("/ndvi")
+    public DataGranule ndvi(@RequestParam Integer orderId){
+        List<DataGranule> dataGranuleList  = dataService.findDataGranulesByOrderId(orderId);
+        List<DataGranule> unzippedDataGranule = processService.doNdvi(dataGranuleList);
+
+        return unzippedDataGranule.get(0);
     }
 }
