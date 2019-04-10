@@ -129,6 +129,7 @@ public class ProcessServiceImpl implements ProcessService {
         for (DataGranule dataGranule: list) {
             if (!dataGranule.getFormatCode().equalsIgnoreCase(FormatCode.NDVI.getFormat())){
                 String inputPath = configs.inputPath + dataGranule.getDataGranulePath();
+                //这里有点问题，getNdvi应该处理多幅影像
                 bandMathService.getNdvi(inputPath);
                 dataGranule = Utils.convertDataGranule(dataGranule,FormatCode.NDVI);
                 dataService.save(dataGranule);

@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
-@ComponentScan(basePackages = {"cn.geosprite.eosprocess","cn.geosprite.eosdata"})
+@ComponentScan("cn.geosprite")
 public class EosDataApplication {
 
     public static void main(String[] args) {

@@ -55,6 +55,9 @@ class BandMathService {
 
     val raster_ndvi = rf.toRaster($"ndvi", tlm.totalCols.toInt, tlm.totalRows.toInt)
 
+    //创建输出文件目录
+    mkdir(outputDir)
+
     //输出png图片
     raster_ndvi.tile.renderPng(ndvi_colorMap).write(outPath(outputDir, "png"))
 

@@ -16,13 +16,18 @@ import javax.imageio.ImageIO
   */
 object Utils {
 
-  def readTiff(name: String): SinglebandGeoTiff = SinglebandGeoTiff(s"$name" + ".tiff")
+  def readTiff(name: String): SinglebandGeoTiff = SinglebandGeoTiff(name)
 
   val ndvi_colorMap:ColorMap = ColorMap.fromStringDouble(ConfigFactory.load().getString("colorMap.ndvi")).get
   val ndwi_colorMap:ColorMap = ColorMap.fromStringDouble(ConfigFactory.load().getString("colorMap.ndwi")).get
 
   //设置输出路径
-  def outPath(name: String, t: String):String =  name + "." + t
+  //  path: /mnt/disk1/geodata/lc8/ndvi/117/043/LC81170432018184LGN00 t: tif
+  //  renturn /mnt/disk1/geodata/lc8/ndvi/117/043/LC81170432018184LGN00/LC81170432018184LGN00.tif
+  def outPath(path: String, t: String):String =  {
+    val dataName = path.split("/").last
+    path +"/" + dataName + "." + t
+  }
 
   // image to Array[Byte]
   @throws[Exception]
@@ -76,5 +81,13 @@ object Utils {
     }
 
     aerosol ++ pair.sortBy(_._2).map(_._1)
+  }
+
+
+  def mkdir(dir: String): Unit = {
+    val folder = new File(dir)
+    if (!folder.exists() && !folder.isDirectory) {
+      folder.mkdirs()
+    }
   }
 }
