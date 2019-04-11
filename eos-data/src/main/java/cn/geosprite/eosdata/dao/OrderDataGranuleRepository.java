@@ -1,14 +1,8 @@
 package cn.geosprite.eosdata.dao;
 
-import cn.geosprite.eosdata.entity.DataGranule;
 import cn.geosprite.eosdata.entity.OrderDataGranule;
-import org.aspectj.weaver.ast.Or;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
-
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -21,6 +15,4 @@ import java.util.List;
 public interface OrderDataGranuleRepository extends CrudRepository<OrderDataGranule, Integer> {
 
     List<OrderDataGranule> findOrderDataGranulesByOrderId(Integer i);
-
-
 }

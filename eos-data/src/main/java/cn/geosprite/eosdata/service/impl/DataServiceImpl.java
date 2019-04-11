@@ -33,12 +33,11 @@ public class DataServiceImpl implements DataService {
 
     public List<DataGranule> findDataGranulesByOrderId(Integer i){
         List<OrderDataGranule> orders = orderDataGranuleRepository.findOrderDataGranulesByOrderId(i);
-        ArrayList<DataGranule> datas = new ArrayList<>();
+        ArrayList<DataGranule> data_list = new ArrayList<>();
         for (OrderDataGranule order: orders){
-            DataGranule data = dataGranuleRepository.findDataGranuleByDataGranuleId(order.getDataGranuleId());
-            datas.add(data);
+            data_list.add(order.getDataGranule());
         }
-        return datas;
+        return data_list;
     }
 
     @Override

@@ -15,11 +15,10 @@ public class OrderDataGranule {
 
     private Integer orderId;
 
-    private String dataGranuleId;
+    @OneToOne
+    @JoinColumn(name = "data_granule_id")
+    private DataGranule dataGranule;
 
     public OrderDataGranule() {
     }
-
-    //    @OneToMany(mappedBy = "data_granule_id")
-//    private List<DataGranule> dataGranules;
 }
