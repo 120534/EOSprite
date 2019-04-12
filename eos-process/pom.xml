@@ -3,11 +3,6 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>eos-process</artifactId>
-    <name>eos-process</name>
-    <description>eos data processing service</description>
-    <version>0.0.1-SNAPSHOT</version>
-
     <parent>
         <groupId>cn.geosprite</groupId>
         <artifactId>eosprite</artifactId>
@@ -15,15 +10,27 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
+    <artifactId>eos-process</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>eos-process</name>
+
+    <properties>
+        <scala.version>2.11.12</scala.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-library</artifactId>
+            <version>${scala.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-compiler</artifactId>
+            <version>${scala.version}</version>
             <scope>provided</scope>
         </dependency>
 
@@ -148,4 +155,5 @@
             </plugin>
         </plugins>
     </build>
+
 </project>
