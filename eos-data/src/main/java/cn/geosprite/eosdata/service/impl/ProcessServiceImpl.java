@@ -1,6 +1,6 @@
 package cn.geosprite.eosdata.service.impl;
 
-import cn.geosprite.eosdata.config.Configs;
+import cn.geosprite.eosdata.config.PathConfigs;
 import cn.geosprite.eosdata.entity.DataGranule;
 import cn.geosprite.eosdata.enums.FormatCode;
 import cn.geosprite.eosdata.service.ProcessService;
@@ -24,18 +24,18 @@ import java.util.List;
 public class ProcessServiceImpl implements ProcessService {
 
     private DataServiceImpl dataService;
-    private Configs configs;
+    private PathConfigs pathConfigs;
     private BandMathService bandMathService;
 
     @Autowired
-    public ProcessServiceImpl(DataServiceImpl dataService, Configs configs, BandMathService bandMathService){
+    public ProcessServiceImpl(DataServiceImpl dataService, PathConfigs pathConfigs, BandMathService bandMathService){
         this.dataService = dataService;
-        this.configs = configs;
+        this.pathConfigs = pathConfigs;
         this.bandMathService = bandMathService;
     }
 
     @Override
-    public List<DataGranule> doLasrc(List<DataGranule> dataGranules) {
+    public List<DataGranule> doSR(List<DataGranule> dataGranules) {
 
         //返回已经做过大气校正的dataGranule信息
         List<DataGranule> srDataGranules = new ArrayList<>();
@@ -48,7 +48,7 @@ public class ProcessServiceImpl implements ProcessService {
             //如果ID里面不包含SR，则需要进行大气校正
             if (!dataGranule.getDataGranuleId().contains("SR")){
                 //大气校正的输入路径
-                String inputPath = configs.inputPath + dataGranule.getDataGranulePath();
+                String inputPath = pathConfigs.inputPath + dataGranule.getDataGranulePath();
 
                 //进行大气校正
                 LasrcService.doLasrc(inputPath);
@@ -71,7 +71,6 @@ public class ProcessServiceImpl implements ProcessService {
      * @param tgzList
      * @return
      */
-    @Override
     public List<DataGranule> unzip(List<DataGranule> tgzList)  {
 
         /**
@@ -95,10 +94,10 @@ public class ProcessServiceImpl implements ProcessService {
                 //判断文件是否被压缩
                 if (formatCode.equalsIgnoreCase(FormatCode.TGZ.getFormat())){
                     //数据在本地的真实路径
-                    String inputPath = configs.inputPath + dataGranulePath;
+                    String inputPath = pathConfigs.inputPath + dataGranulePath;
                     //数据输出路径设置,进行字符串拼接，
                     // /mnt/disk1/geodata/  +  dir/117/050/LC81170502019011LGN00
-                    String outPath = configs.outputPath  + Utils.pathUpdate(dataGranule.getDataGranulePath(),"dir");
+                    String outPath = pathConfigs.outputPath  + Utils.pathUpdate(dataGranule.getDataGranulePath(),"dir");
                     //解压数据
                     Utils.unzip(inputPath, outPath);
 
@@ -120,15 +119,23 @@ public class ProcessServiceImpl implements ProcessService {
         }
 
     @Override
-    public List<DataGranule> doNdvi(List<DataGranule> srList) {
+    public List<DataGranule> doNDVI(List<DataGranule> srList) {
+
+        /**
+         *先要判断是否计算过Ndvi，然后在对其进行下一步操作。
+         * 但是这里判断是否做过nvdi，逻辑应该放在doNdvi代码前。
+         *
+         */
+
+
         List<DataGranule> ndviDataGranules = new ArrayList<>();
 
         //确保数据都做过大气校正
-        List<DataGranule> list = doLasrc(srList);
+        List<DataGranule> list = doSR(srList);
 
         for (DataGranule dataGranule: list) {
             if (!dataGranule.getFormatCode().equalsIgnoreCase(FormatCode.NDVI.getFormat())){
-                String inputPath = configs.inputPath + dataGranule.getDataGranulePath();
+                String inputPath = pathConfigs.inputPath + dataGranule.getDataGranulePath();
                 //这里有点问题，getNdvi应该处理多幅影像
                 bandMathService.getNdvi(inputPath);
                 dataGranule = Utils.convertDataGranule(dataGranule,FormatCode.NDVI);
@@ -146,9 +153,12 @@ public class ProcessServiceImpl implements ProcessService {
      * @param data
      * @return
      */
-    @Override
+
     public DataGranule downloadData(DataGranule data) {
         return null;
     }
+
+
+
 
 }

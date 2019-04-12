@@ -22,13 +22,26 @@ Lasrc步骤
       解压后的路径根据原路径进行更改。
       由于解压信息没有体现在ID中,解压后修改内容包括：
       dataGranuleId,productCode,formatCode,dataPath,四部分
-      
-
       在将这些解压后的数据存储到本地，同时在DataGranule表中写入数据信息。
     3.读取数据路径，执行Lasrc，
     
     还需要注意的是，解压后的，还需要修改orderGranule的data_granule_id
     
     
+    
+用户查询数据时候，应该根据其需要的数据类型进行判断数据产品是否已经生成，
+再对没有的部分数据执行NDVI 或者其他指数模型。
+应该统一部署过滤器，还需要根据前端返回数据进行修改。
+程序添加logger
+
+    需要考虑清楚前端请求数据包括哪些
+    {
+    范围：data spatial range 或者 path row 或者 vector
+    时间：start ~ end
+    传感器：如 landsat
+    数据产品名称: 如，RAW，NDVI，SR ~~~
+    
+          
+    }，
     
     

@@ -43,7 +43,7 @@ public class ProcessController {
     @GetMapping("/lasrc")
     public DataGranule lasrc(@RequestParam Integer orderId){
         List<DataGranule> dataGranuleList  = dataService.findDataGranulesByOrderId(orderId);
-        List<DataGranule> unzippedDataGranule = processService.doLasrc(dataGranuleList);
+        List<DataGranule> unzippedDataGranule = processService.doSR(dataGranuleList);
 
         return unzippedDataGranule.get(0);
     }
@@ -51,7 +51,7 @@ public class ProcessController {
     @GetMapping("/ndvi")
     public DataGranule ndvi(@RequestParam Integer orderId){
         List<DataGranule> dataGranuleList  = dataService.findDataGranulesByOrderId(orderId);
-        List<DataGranule> unzippedDataGranule = processService.doNdvi(dataGranuleList);
+        List<DataGranule> unzippedDataGranule = processService.doNDVI(dataGranuleList);
 
         return unzippedDataGranule.get(0);
     }

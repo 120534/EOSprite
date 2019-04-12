@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 @Data
 @ConfigurationProperties(prefix = "prefix")
 @Component
-public class Configs {
+public class PathConfigs {
 
     /**本地路径前缀
      * 如 dataGranulePath = raw/117/050/LC81170502018264LGN00.tgz

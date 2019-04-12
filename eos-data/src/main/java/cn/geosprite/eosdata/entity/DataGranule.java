@@ -1,6 +1,8 @@
 package cn.geosprite.eosdata.entity;
 
 
+import lombok.Data;
+
 import javax.persistence.*;
 import java.sql.Date;
 
@@ -40,6 +42,20 @@ public class DataGranule {
   }
 
   public DataGranule() {
+  }
+  @Override
+  public String toString() {
+    return "DataGranule{" +
+            "dataGranuleId='" + dataGranuleId + '\'' +
+            ", sensorCode='" + sensorCode + '\'' +
+            ", productCode='" + productCode + '\'' +
+            ", tileCode='" + tileCode + '\'' +
+            ", sceneDate=" + sceneDate +
+            ", formatCode='" + formatCode + '\'' +
+            ", dataSource='" + dataSource + '\'' +
+            ", dataGranulePath='" + dataGranulePath + '\'' +
+            ", dataGranuleUri='" + dataGranuleUri + '\'' +
+            '}';
   }
 
   public String getDataGranuleId() {
@@ -112,20 +128,5 @@ public class DataGranule {
 
   public void setDataGranuleUri(String dataGranuleUri) {
     this.dataGranuleUri = dataGranuleUri;
-  }
-
-  @Override
-  public String toString() {
-    return "DataGranule{" +
-            "dataGranuleId='" + dataGranuleId + '\'' +
-            ", sensorCode='" + sensorCode + '\'' +
-            ", productCode='" + productCode + '\'' +
-            ", tileCode='" + tileCode + '\'' +
-            ", sceneDate=" + sceneDate +
-            ", formatCode='" + formatCode + '\'' +
-            ", dataSource='" + dataSource + '\'' +
-            ", dataGranulePath='" + dataGranulePath + '\'' +
-            ", dataGranuleUri='" + dataGranuleUri + '\'' +
-            '}';
   }
 }
