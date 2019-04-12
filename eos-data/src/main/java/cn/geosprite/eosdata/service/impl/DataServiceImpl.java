@@ -3,16 +3,13 @@ package cn.geosprite.eosdata.service.impl;
 import cn.geosprite.eosdata.dao.DataGranuleRepository;
 import cn.geosprite.eosdata.dao.OrderDataGranuleRepository;
 import cn.geosprite.eosdata.entity.DataGranule;
-import cn.geosprite.eosdata.entity.OrderDataGranule;
 import cn.geosprite.eosdata.service.DataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
-
 /**
  * @ Author     ：wanghl
  * @ Date       ：Created in 9:44 2019-4-3
@@ -32,12 +29,7 @@ public class DataServiceImpl implements DataService {
     }
 
     public List<DataGranule> findDataGranulesByOrderId(Integer i){
-        List<OrderDataGranule> orders = orderDataGranuleRepository.findOrderDataGranulesByOrderId(i);
-        ArrayList<DataGranule> data_list = new ArrayList<>();
-        for (OrderDataGranule order: orders){
-            data_list.add(order.getDataGranule());
-        }
-        return data_list;
+        return dataGranuleRepository.findDataGranulesByOrderDataGranuleId(i);
     }
 
     @Override
@@ -47,6 +39,12 @@ public class DataServiceImpl implements DataService {
     @Override
     public Page<DataGranule> findAll(Pageable pageable) {
             return dataGranuleRepository.findAll(pageable);
+    }
+
+    public List<DataGranule> ndviPredicate(List<DataGranule> list){
+//        list.stream().filter(x -> x.getDataGranuleId());
+
+        return list;
     }
 
 }
