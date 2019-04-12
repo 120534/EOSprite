@@ -20,38 +20,23 @@ import java.util.List;
 @RestController
 public class ProcessController {
 
-    private DataServiceImpl dataService;
     private ProcessServiceImpl processService;
 
     @Autowired
-    public ProcessController(DataServiceImpl dataService, ProcessServiceImpl processService){
-        this.dataService = dataService;
+    public ProcessController(ProcessServiceImpl processService) {
         this.processService = processService;
-    }
-
-    /**
-     * 测试数据解压缩，以及数据入库。 测试ok
-     */
-    @GetMapping("/unzip")
-    public DataGranule unzip(@RequestParam Integer orderId){
-      List<DataGranule> dataGranuleList  = dataService.findDataGranulesByOrderId(orderId);
-      List<DataGranule> unzippedDataGranule = processService.unzip(dataGranuleList);
-
-      return unzippedDataGranule.get(0);
     }
 
     @GetMapping("/lasrc")
     public DataGranule lasrc(@RequestParam Integer orderId){
-        List<DataGranule> dataGranuleList  = dataService.findDataGranulesByOrderId(orderId);
-        List<DataGranule> unzippedDataGranule = processService.doSR(dataGranuleList);
+        List<DataGranule> unzippedDataGranule = processService.doSR(orderId);
 
         return unzippedDataGranule.get(0);
     }
 
     @GetMapping("/ndvi")
     public DataGranule ndvi(@RequestParam Integer orderId){
-        List<DataGranule> dataGranuleList  = dataService.findDataGranulesByOrderId(orderId);
-        List<DataGranule> unzippedDataGranule = processService.doNDVI(dataGranuleList);
+        List<DataGranule> unzippedDataGranule = processService.doNDVI(orderId);
 
         return unzippedDataGranule.get(0);
     }
