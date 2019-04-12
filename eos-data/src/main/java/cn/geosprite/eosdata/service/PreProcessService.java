@@ -12,7 +12,7 @@ import java.util.List;
  */
 public interface PreProcessService {
 
-    DataGranule downloadData(DataGranule data);
+    DataGranule downloadData(DataGranule dataGranule);
 
-    List<DataGranule> extractFiles(List<DataGranule> tgzList);
+    List<DataGranule> extractFiles(List<DataGranule> dataGranules);
 }
