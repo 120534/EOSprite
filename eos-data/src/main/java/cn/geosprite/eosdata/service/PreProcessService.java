@@ -2,7 +2,6 @@ package cn.geosprite.eosdata.service;
 
 import cn.geosprite.eosdata.entity.DataGranule;
 
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -11,9 +10,9 @@ import java.util.List;
  * @ Description：包含一些处理逻辑
  * @ Modified By：
  */
-public interface ProcessService {
+public interface PreProcessService {
 
-    List<DataGranule> doSR(List<DataGranule> dataGranules);
+    DataGranule downloadData(DataGranule dataGranule);
 
-    List<DataGranule> doNDVI(List<DataGranule> dataGranules);
+    List<DataGranule> extractFiles(List<DataGranule> dataGranules);
 }
