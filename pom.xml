@@ -15,14 +15,20 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>2.1.3.RELEASE</version>
-        <relativePath/> <!-- lookup parent from repository -->
+
     </parent>
 
     <!-- 声明多个子模块 -->
     <modules>
-        <module>eos-data</module>
         <module>eos-process</module>
+        <module>eos-data</module>
     </modules>
+
+    <properties>
+        <java.version>1.8</java.version>
+        <scala.version>2.11.12</scala.version>
+    </properties>
+
 
     <!-- 统一管理依赖的版本号 -->
     <dependencyManagement>
@@ -30,12 +36,22 @@
             <dependency>
                 <groupId>cn.geosprite</groupId>
                 <artifactId>eos-data</artifactId>
-                <version>0.0.1-SNAPSHOT</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>cn.geosprite</groupId>
                 <artifactId>eos-process</artifactId>
-                <version>0.0.1-SNAPSHOT</version>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.scala-lang</groupId>
+                <artifactId>scala-library</artifactId>
+                <version>${scala.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.scala-lang</groupId>
+                <artifactId>scala-compiler</artifactId>
+                <version>${scala.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
