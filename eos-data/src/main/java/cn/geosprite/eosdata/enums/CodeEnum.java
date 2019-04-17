@@ -9,7 +9,6 @@ package cn.geosprite.eosdata.enums;
 public interface CodeEnum {
 
     String getFormat();
-    String getPathPrefix();
     String getProductCode();
 
 }

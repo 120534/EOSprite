@@ -1,6 +1,7 @@
 package cn.geosprite.eosdata.enums;
 
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 
 /**
@@ -10,21 +11,21 @@ import lombok.Getter;
  * @ Modified By：
  */
 @Getter
+@Slf4j
 public enum FormatCode implements CodeEnum {
-    TGZ("tgz","raw/","L1TP_C1_T1"),
+    TGZ("TGZ","L1TP_C1_T1"),
     //DIR means unzipped
-    DIR("dir","dir/","L1TP_C1_T1_DIR"),
-    SR("sr","sr/","L1TP_C1_T1_SR"),
-    NDVI("ndvi","ndvi/","L1TP_C1_T1_NDVI")
+    DIR("TIFF","L1TP_C1_T1"),
+    SR("TIFF","L1TP_C1_T1_SR"),
+    NDVI_TIFF("TIFF","L1TP_C1_T1_NDVI"),
+    NDVI_PNG("PNG","L1TP_C1_T1_NDVI")
     ;
 
     private String format;
-    private String pathPrefix;
     private String productCode;
 
-    FormatCode(String format, String pathPrefix, String productCode) {
+    FormatCode(String format,  String productCode) {
         this.format = format;
-        this.pathPrefix = pathPrefix;
         this.productCode = productCode;
     }
 

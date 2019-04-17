@@ -1,0 +1,28 @@
+.main-title{
+    width:400px;
+    height:200px;
+    margin-left: 0px;
+}
+.tab-nav{
+    margin:0;
+    height:30px;
+    padding:0;
+}
+.tab-nav li{
+    margin:0;
+    padding:0;
+    width:100px;
+    height:30px;
+    float:left;
+    text-align:center;
+    line-height:30px;
+    list-style-type:none;
+}
+.current{
+    background: #c8c2cc;
+}
+.tab-content{
+    height:150px;
+    width:400px;
+    margin-top:10px;
+}

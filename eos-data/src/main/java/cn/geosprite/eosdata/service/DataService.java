@@ -23,6 +23,4 @@ public interface DataService {
     //分页查询全部
     Page<DataGranule> findAll(Pageable pageable);
 
-
-
 }

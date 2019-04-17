@@ -1,7 +1,10 @@
 package cn.geosprite.eosdata.service.impl;
 
+import cn.geosprite.eosdata.config.PathConfigs;
 import cn.geosprite.eosdata.dao.DataGranuleRepository;
+import cn.geosprite.eosdata.dataGranuleUtils.DataGranules;
 import cn.geosprite.eosdata.entity.DataGranule;
+import cn.geosprite.eosdata.enums.FormatCode;
 import cn.geosprite.eosdata.service.PreProcessService;
 import org.apache.commons.beanutils.BeanUtils;
 import org.rauschig.jarchivelib.ArchiveFormat;
@@ -26,11 +29,13 @@ import java.util.List;
 @Service
 public class PreProcessServiceImpl implements PreProcessService {
 
+    private PathConfigs pathConfigs;
     private DataGranuleRepository dataGranuleRepository;
 
     @Autowired
-    public PreProcessServiceImpl(DataGranuleRepository dataGranuleRepository) {
+    public PreProcessServiceImpl(DataGranuleRepository dataGranuleRepository, PathConfigs pathConfigs) {
         this.dataGranuleRepository = dataGranuleRepository;
+        this.pathConfigs = pathConfigs;
     }
 
     @Override
@@ -52,52 +57,38 @@ public class PreProcessServiceImpl implements PreProcessService {
         List<DataGranule> result = new ArrayList<>();
 
         for (DataGranule dataGranule : dataGranules) {
-            //获取dataGranul里面可能需要修改的信息
-            String inputPath = dataGranule.getDataGranulePath();
-            String outputPath = dataGranule.getDataGranulePath() + "_DIR";
-            String dataGranuleId = outputPath;
+            //获取数据读取路径
+            String inputPath = pathConfigs.inputPath + dataGranule.getDataGranulePath();
+            DataGranule outputDataGranule = DataGranules.converter(dataGranule, FormatCode.DIR);
+
+            //数据解压输出路径
+            String outputPath = pathConfigs.outputPath + outputDataGranule.getDataGranulePath();
+
             String formatCode = dataGranule.getFormatCode();
             String uri = dataGranule.getDataGranuleUri();
-
-            DataGranule outputDataGranule = new DataGranule();
 
             if (uri != null) {
                 //后期补充
                 DataGranule dataGranule1 = downloadData(dataGranule);
             }
 
-            if (!formatCode.equalsIgnoreCase("DIR")) {
-
-                if (formatCode.equalsIgnoreCase("TGZ")) {
-
-                    File destination = new File(outputPath);
-                    File source = new File(inputPath);
-                    Archiver archiver = ArchiverFactory.createArchiver(ArchiveFormat.TAR, CompressionType.GZIP);
-                    try {
-                        archiver.extract(source, destination);
-
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-
+            /**
+             *  判断其类型为TGZ的对其进行解压，其他类型不做处理。
+             */
+            if (formatCode.equalsIgnoreCase("TGZ")) {
+                File destination = new File(outputPath);
+                File source = new File(inputPath);
+                Archiver archiver = ArchiverFactory.createArchiver(ArchiveFormat.TAR, CompressionType.GZIP);
                 try {
-                    BeanUtils.copyProperties(outputDataGranule, dataGranule);
-                    dataGranule.setDataGranulePath(outputPath);
-                    dataGranule.setDataGranuleId(dataGranuleId);
+                    archiver.extract(source, destination);
                     dataGranuleRepository.save(outputDataGranule);
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                } catch (InvocationTargetException e) {
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
-            } else {
-                outputDataGranule = dataGranule;
+            dataGranule = outputDataGranule;
             }
-
-            result.add(outputDataGranule);
+            result.add(dataGranule);
         }
-
         return result;
     }
 }

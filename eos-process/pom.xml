@@ -40,23 +40,7 @@
             <version>1.1.0</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
 
-        <!-- @ConfigurationProperties annotation processing (metadata for IDEs)
-                 生成spring-configuration-metadata.json类，需要引入此类-->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-configuration-processor</artifactId>
-            <optional>true</optional>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-thymeleaf</artifactId>
-        </dependency>
         <!--JDK8 is compatible with paranamer version 2.8 or above and spark 2.4.0 uses paranamer version 2.7.-->
         <dependency>
             <groupId>com.thoughtworks.paranamer</groupId>
@@ -87,11 +71,7 @@
             </exclusions>
         </dependency>
 
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
+
 
         <dependency>
             <groupId>org.locationtech.rasterframes</groupId>

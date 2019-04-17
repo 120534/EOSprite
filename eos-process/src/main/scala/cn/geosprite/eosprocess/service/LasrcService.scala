@@ -1,11 +1,17 @@
 package cn.geosprite.eosprocess.service
 
 
+import java.io.PrintWriter
+
+import lombok.extern.slf4j.Slf4j
+import org.slf4j.Logger
 import org.springframework.stereotype.Service
 
 
 @Service
 class LasrcService {
+
+    private val log :org.slf4j.Logger  = org.slf4j.LoggerFactory.getLogger(classOf[LasrcService])
 
     /**
      * description: 这个service用来进行大气校正，需要两个参数，输入和输出路径。在demo里面先自定义输出路径。
@@ -15,22 +21,42 @@ class LasrcService {
      * @return _root_.scala.Predef.String
      */
 
-  def doLasrc(inputPath: String):String = {
+    def doLasrc(inputPath: String, outputPath: String):String = {
 
-    val dataName = inputPath.split("/").last
+      // inputPath "/mnt/disk1/geodata/lc8/dir/117/033/LC81170332018184LGN00"
 
-    val outputPath = s"/home/hadoop/sr/$dataName"
+      //这里的的输出路径已经定下来是由输入路径修改得来。
+      // outputPath "/mnt/disk1/geodata/lc8/sr/117/033/LC81170332018184LGN00"
 
+      import java.io.File
 
-    val cmd = "docker run " +
-      s"-v $inputPath:/mnt/input-dir:ro " +
-      s"-v $outputPath:/mnt/output-dir:rw -v /mnt/disk1/LaSRC:/mnt/lasrc-aux:ro " +
-      "--rm -t geosprite-usgs-espa-lasrc " +
-      dataName
+      def getName(inputPath:String): String ={
+        val file = new File(inputPath)
+        val files = file.listFiles().filter(! _.isDirectory)
+          .filter(t => t.toString.endsWith("_MTL.txt"))
+        val f = files.head.getName.split("_")
+        f.take(f.length - 1).mkString("_")
+      }
 
-    import scala.sys.process._
-    val result = cmd.!!
-    //需要考虑返回信息如何设置，以及异常处理
-    result
-  }
+      val dataName = getName(inputPath)
+      val cmd = "docker run " +
+        s"-v $inputPath:/mnt/input-dir:ro " +
+        s"-v $outputPath:/mnt/output-dir:rw -v /mnt/disk1/LaSRC:/mnt/lasrc-aux:ro " +
+        "--rm -t geosprite-usgs-espa-lasrc " +
+        dataName
+      log.info("Start lasrc processs for {}", dataName)
+      import scala.sys.process._
+      val result = cmd.!!
+      //需要考虑返回信息如何设置，以及异常处理
+      log.info("the result of lasrc is {}", result)
+      //输出大气校正的日志信息
+      def writeLog(str:String ): Unit ={
+        val out = new PrintWriter(outputPath + "/" + dataName + ".log")
+        out.write(str)
+        out.close()
+      }
+
+      writeLog(result)
+      result
+    }
 }

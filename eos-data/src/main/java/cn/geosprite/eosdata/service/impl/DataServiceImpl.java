@@ -6,7 +6,9 @@ import cn.geosprite.eosdata.entity.DataGranule;
 import cn.geosprite.eosdata.service.DataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -36,9 +38,16 @@ public class DataServiceImpl implements DataService {
     public void save(DataGranule dataGranule) {
         dataGranuleRepository.save(dataGranule); }
 
+    /**
+     * 分页测试
+     * @param pageable
+     * @return
+     */
     @Override
     public Page<DataGranule> findAll(Pageable pageable) {
-            return dataGranuleRepository.findAll(pageable);
+        Sort sort = new Sort(Sort.Direction.ASC,"sceneDate");
+        PageRequest pr =  PageRequest.of(pageable.getPageNumber(),pageable.getPageSize(),sort);
+        return dataGranuleRepository.findAll(pr);
     }
 
     public List<DataGranule> ndviPredicate(List<DataGranule> list){

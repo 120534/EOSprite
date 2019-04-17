@@ -1,10 +1,19 @@
 package cn.geosprite.eosdata.controller;
 
+import cn.geosprite.eosdata.dao.DataGranuleRepository;
 import cn.geosprite.eosdata.entity.DataGranule;
 import cn.geosprite.eosdata.service.impl.DataServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.sql.Date;
@@ -45,5 +54,18 @@ public class DataController {
 
         dataService.save(dataGranule);
         return dataGranule;
+    }
+
+
+    @RequestMapping(value = "/getAll", method=RequestMethod.GET)
+    public String getEntryByPageable(Model model,
+                                     @RequestParam(defaultValue = "1" ) Integer page,
+                                     @RequestParam(defaultValue = "5" ) Integer size
+                                                ) {
+        PageRequest pageRequest = PageRequest.of(page - 1, size, new Sort(Sort.Direction.ASC, "sceneDate"));
+        model.addAttribute("dataGranules", dataService.findAll(pageRequest));
+        model.addAttribute("page", page);
+        model.addAttribute("pageRequest", pageRequest);
+        return "index";
     }
 }
