@@ -13,12 +13,6 @@
 </head>
 <body>
 <div class="container">
-    <div style="margin-top: 10px;">
-
-    </div>
-</div>
-
-<div class="container">
     <div class="row clearfix">
         <div class="col-md-3 column">
             <div class="vis-selector">
@@ -131,7 +125,10 @@
                 <!--th:text="${nav}"></a></li>-->
                 <!--</th:block>-->
 
-                <!--一共显示五个页面-->
+                <!--一共显示五个分页
+                如果page在第三页以内，
+
+                -->
                 <li th:if="${page - 2 >=1}" ><a th:href="@{'/data/getAll?page=' + ${page - 2}}" th:text="${page -2}" >1</a></li>
                 <li th:if="${page - 1 >=1}" ><a th:href="@{'/data/getAll?page=' + ${page - 1}}" th:text="${page -1}" >1</a></li>
                 <li class="active"><a href="#" th:text="${page}" >1</a></li>
@@ -158,8 +155,8 @@
         </div>
     </div>
 </div>
-<script src =../static/js/javascript.js></script>
-<link rel="stylesheet" type="text/css" href="../static/css/style.css" />
+<script src="../static/js/javascript.js" th:src ="@{/js/javascript.js}"></script>
+<link rel="stylesheet" type="text/css" href="../static/css/style.css" th:href="@{/css/style.css}"/>
 </body>
 </html>
 
