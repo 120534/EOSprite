@@ -62,9 +62,14 @@ class BandMathService {
     val raster_ndvi = rf.toRaster($"ndvi", tlm.totalCols.toInt, tlm.totalRows.toInt)
 
     //创建输出文件目录 LC08/L1TP_C1_T1_NDVI/TIFF/117/050/2019/01/11/LC81170502019011LGN00.TIF
-    val arr = outputPathPng.split("/")
-    val dir = arr.take(arr.length - 1).mkString("/")
-    mkdir(dir)
+    val arrPng = outputPathPng.split("/")
+    val dirPng = arrPng.take(arrPng.length - 1).mkString("/")
+
+    val arrTiff = outputPathTiff.split("/")
+    val dirTiff = arrTiff.take(arrTiff.length - 1).mkString("/")
+
+    mkdir(dirPng)
+    mkdir(dirTiff)
 
     //输出png图片
     log.info("output ndvi png image result to {}",outputPathPng)
@@ -103,9 +108,14 @@ class BandMathService {
     val raster_ndwi = rf.toRaster($"nwvi", tlm.totalCols.toInt, tlm.totalRows.toInt)
 
     //创建输出文件目录 LC08/L1TP_C1_T1_NDVI/TIFF/117/050/2019/01/11/LC81170502019011LGN00.TIF
-    val arr = outputPathPng.split("/")
-    val dir = arr.take(arr.length - 1).mkString("/")
-    mkdir(dir)
+    val arrPng = outputPathPng.split("/")
+    val dirPng = arrPng.take(arrPng.length - 1).mkString("/")
+
+    val arrTiff = outputPathTiff.split("/")
+    val dirTiff = arrTiff.take(arrTiff.length - 1).mkString("/")
+
+    mkdir(dirPng)
+    mkdir(dirTiff)
 
     //输出png图片
     log.info("output ndvi png image result to {}",outputPathPng)
