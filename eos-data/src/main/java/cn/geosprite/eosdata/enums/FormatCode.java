@@ -18,7 +18,9 @@ public enum FormatCode implements CodeEnum {
     DIR("TIFF","L1TP_C1_T1"),
     SR("TIFF","L1TP_C1_T1_SR"),
     NDVI_TIFF("TIFF","L1TP_C1_T1_NDVI"),
-    NDVI_PNG("PNG","L1TP_C1_T1_NDVI")
+    NDVI_PNG("PNG","L1TP_C1_T1_NDVI"),
+    NDWI_TIFF("TIFF","L1TP_C1_T1_NDWI"),
+    NDWI_PNG("PNG","L1TP_C1_T1_NDWI")
     ;
 
     private String format;

@@ -40,4 +40,11 @@ public class ProcessController {
 
         return unzippedDataGranule.get(0);
     }
+
+    @GetMapping("/ndwi")
+    public DataGranule ndwi(@RequestParam Integer orderId){
+        List<DataGranule> unzippedDataGranule = processService.doNWVI(orderId);
+
+        return unzippedDataGranule.get(0);
+    }
 }

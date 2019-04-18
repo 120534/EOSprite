@@ -103,7 +103,7 @@ public class ProcessServiceImpl implements ProcessService {
                 String tiffPath = pathConfigs.inputPath + ndviTiff.getDataGranulePath();
 
                 //这里有点问题，getNdvi应该处理多幅影像
-                bandMathService.getNdvi(inputPath, pngPath, tiffPath);
+                bandMathService.getNDVI(inputPath, pngPath, tiffPath);
 //                dataGranule = Utils.convertDataGranule(dataGranule,FormatCode.NDVI);
 //                dataService.save(dataGranule);
                 dataGranuleRepository.save(ndviPng);
@@ -115,4 +115,35 @@ public class ProcessServiceImpl implements ProcessService {
         }
         return result;
     }
+
+    public List<DataGranule> doNWVI(Integer orderId){
+        List<DataGranule> result = new ArrayList<>();
+
+        //确保数据都做过大气校正
+        List<DataGranule> list = doSR(orderId);
+
+        for (DataGranule dataGranule: list) {
+            DataGranule ndwiPng = DataGranules.converter(dataGranule, FormatCode.NDWI_PNG);
+            DataGranule ndwiTiff = DataGranules.converter(dataGranule, FormatCode.NDWI_TIFF);
+
+            if (dataGranule.getProductCode().equalsIgnoreCase(FormatCode.SR.getProductCode()) &&
+                    dataGranule.getFormatCode().equalsIgnoreCase(FormatCode.SR.getFormat())){
+                String inputPath = pathConfigs.inputPath + dataGranule.getDataGranulePath();
+                String pngPath = pathConfigs.inputPath + ndwiPng.getDataGranulePath();
+                String tiffPath = pathConfigs.inputPath + ndwiTiff.getDataGranulePath();
+
+                //这里有点问题，getNdvi应该处理多幅影像
+                bandMathService.getNDWI(inputPath, pngPath, tiffPath);
+//                dataGranule = Utils.convertDataGranule(dataGranule,FormatCode.NDVI);
+//                dataService.save(dataGranule);
+                dataGranuleRepository.save(ndwiPng);
+                dataGranuleRepository.save(ndwiTiff);
+                result.add(ndwiPng);
+                result.add(ndwiTiff);
+            }
+            result.add(dataGranule);
+        }
+        return result;
+    }
+
 }
