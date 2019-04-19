@@ -14,15 +14,8 @@
 <body>
 <div class="container">
     <div class="row clearfix">
+        <!--Researching Form -->
         <div class="col-md-3 column">
-            <div class="vis-selector">
-                <label>选择数据集</label>
-                <select>
-                    <option>Landsat</option>
-                    <option>MODIS</option>
-                    <option>Sentinel</option>
-                </select>
-            </div>
             <div class="main-title">
                 <ul class="tab-nav">
                     <li class="current" name="basic"><a href="#"></a>行列号选择</li>
@@ -31,12 +24,22 @@
                 </ul>
                 <div class="tab-content">
                     <form action="/test" method="post">
-                        <label >sensor</label>
-                        <select name="sensor">
-                            <option>Landsat-8</option>
-                            <option>MODIS</option>
-                            <option>Sentinel-2</option>
-                        </select>
+                        <div class="vis-selector">
+                            <label>选择数据集</label>
+                            <select name="sensorCode">
+                                <option>Landsat</option>
+                                <option>MODIS</option>
+                                <option>Sentinel</option>
+                            </select>
+                        </div>
+                        <div class="vis-selector">
+                            <label>选择数据产品</label>
+                            <select name="productCode">
+                                <option>sr</option>
+                                <option>ndvi</option>
+                                <option>nwvi</option>
+                            </select>
+                        </div>
                         <div>
                             <label>path</label>
                             <input type="text" name="path"  />
@@ -66,8 +69,8 @@
                     TAB3内容
                 </div>
             </div>
-
         </div>
+        <!--Result Table-->
         <div class="col-md-9 column">
             <table class="table">
                     <thead>
