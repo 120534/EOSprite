@@ -6,6 +6,7 @@ import cn.geosprite.eosdata.dataGranuleUtils.DataGranules;
 import cn.geosprite.eosdata.entity.DataGranule;
 import cn.geosprite.eosdata.enums.FormatCode;
 import cn.geosprite.eosdata.service.PreProcessService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.beanutils.BeanUtils;
 import org.rauschig.jarchivelib.ArchiveFormat;
 import org.rauschig.jarchivelib.Archiver;
@@ -27,6 +28,7 @@ import java.util.List;
  * @ Modified By：
  */
 @Service
+@Slf4j
 public class PreProcessServiceImpl implements PreProcessService {
 
     private PathConfigs pathConfigs;
@@ -76,6 +78,7 @@ public class PreProcessServiceImpl implements PreProcessService {
              *  判断其类型为TGZ的对其进行解压，其他类型不做处理。
              */
             if (formatCode.equalsIgnoreCase("TGZ")) {
+
                 File destination = new File(outputPath);
                 File source = new File(inputPath);
                 Archiver archiver = ArchiverFactory.createArchiver(ArchiveFormat.TAR, CompressionType.GZIP);
@@ -90,5 +93,15 @@ public class PreProcessServiceImpl implements PreProcessService {
             result.add(dataGranule);
         }
         return result;
+    }
+
+    /**
+     *根据数据请求过滤数据信息
+     * 如：前端请求 ndvi数据
+     */
+
+    public List<DataGranule> dataFilter(List<DataGranule> dataGranules){
+
+        return null;
     }
 }

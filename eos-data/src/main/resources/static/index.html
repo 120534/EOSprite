@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Order</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.1.0/dist/leaflet.css" integrity="sha512-wcw6ts8Anuw10Mzh9Ytw4pylW8+NAD4ch3lqm9lzAsTxg0GFeJgoAtxuCLREZSC5lUXdVyo/7yfsqFjQ4S+aKw==" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.1.0/dist/leaflet.js" integrity="sha512-mNqn2Wg7tSToJhvHcqfzLMU6J4mkOImSPTxVZAdo+lcPlk+GhZmYgACEe0x35K7YzW1zJ7XyJV/TT1MrdXvMcA==" crossorigin=""></script>
+
+    <!--time picker-->
+    <script  src="js/jquery-3.3.1.min.js" ></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+</head>
+
+<style>
+    #map {
+        height: 900px;
+        z-index: 1;
+    }
+</style>
+
+<body>
+<body>
+<div style="position: relative">
+    <div id="map"></div>
+    <div id="form-table">
+        <div class="main-title">
+            <ul class="tab-nav">
+                <li class="current"><a href="#">行列号选择</a></li>
+                <li class="current"><a href="#">经纬度选择</a></li>
+                <li class="current"><a href="#">矢量文件选择</a></li>
+            </ul>
+            <div class="tab-content">
+                <form method="post" action="/data/postOrder">
+                    <div class="vis-selector">
+                        <label>选择数据集</label>
+                        <select id="select-dataSet" name="dataSensorName">
+                            <option selected disabled>请选择</option>
+                            <option>Landsat-8</option>
+                            <option>MODIS</option>
+                            <option>Sentinel-2</option>
+                        </select>
+                    </div>
+                    <div class="vis-selector">
+                        <label>选择数据产品</label>
+                        <select id="select-product" name="dataProductName">
+                            <option selected disabled>请选择</option>
+                            <option>归一化植被指数(NDVI)</option>
+                            <option>归一化水体指数(NDWI)</option>
+                            <option>地表反射率产品(SR)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>path:</label>
+                        <input class="tile-text" type="text" name="startPath" id="startPath"/>
+                        &nbsp;至&nbsp;
+                        <input class="tile-text" type="text" name="endPath" id="endPath"/>
+                    </div>
+                    <div>
+                        <label>row:&nbsp;</label>
+                        <input class="tile-text" type="text" name="startRow" id="startRow"/>
+                        &nbsp;至&nbsp;
+                        <input class="tile-text" type="text" name="endRow" id="endRow" />
+                    </div>
+                    <div>
+                        <label for="daterange">date:&nbsp;</label><input type="text" id = "daterange" value="01/01/2018 - 01/15/2018" name="date"/>
+                    </div>
+                    <p><input id="btn-1" type="submit" value="Submit" /> <input type="reset" value="Reset" /></p>
+                </form>
+            </div>
+            <div class="tab-content" style="display:none">
+                TAB2内容
+            </div>
+            <div class="tab-content" style="display:none">
+                TAB3内容
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script src="js/javascript.js" ></script>
+<link rel="stylesheet" type="text/css" href="css/style.css"/>
+<link href="vendor/bootstrap-3.3.7-dist/css/bootstrap.min.css" rel="stylesheet">
+</body>
+</html>

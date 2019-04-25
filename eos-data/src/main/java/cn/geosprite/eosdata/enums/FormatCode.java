@@ -1,8 +1,6 @@
 package cn.geosprite.eosdata.enums;
 
 import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
-
 
 /**
  * @ Author     ：wanghl
@@ -11,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
  * @ Modified By：
  */
 @Getter
-@Slf4j
 public enum FormatCode implements CodeEnum {
     TGZ("TGZ","L1TP_C1_T1"),
     //DIR means unzipped

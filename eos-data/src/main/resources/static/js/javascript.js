@@ -8,8 +8,8 @@ $(function() {
 
 $('.tab-nav li').click(function(){
     $('.tab-content').css('display','none');
-    $('.tab-content').eq($(this).index()).css('display','block')
-})
+    $('.tab-content').eq($(this).order()).css('display','block')
+});
 
 var map = L.map('map',{zoomControl: false}).setView([35, 110], 4);
 L.tileLayer('https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}', {
@@ -58,19 +58,5 @@ $("#btn-1").click(function(){
         alert("Row必须为数字!");
         return false;
     }
-
-    $.post("/home",{
-        'productCode':val1,
-        'tileCode':val2,
-        'startRow':v
-    });
-
 });
 
-function doPost(url)
-{
-    var val1 = $("#startPath").val();
-    var val2 =$("#endPath").val();
-
-    $.post("/home",{'key1':val1, 'key2':val2});
-}

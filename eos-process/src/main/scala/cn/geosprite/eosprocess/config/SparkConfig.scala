@@ -2,6 +2,7 @@ package cn.geosprite.eosprocess.config
 
 import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.sql.SparkSession
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.condition.{ConditionalOnClass, ConditionalOnMissingBean}
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.context.annotation.{Bean, Configuration, PropertySource}

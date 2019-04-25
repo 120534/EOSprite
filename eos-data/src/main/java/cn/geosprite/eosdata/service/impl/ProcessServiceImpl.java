@@ -5,16 +5,13 @@ import cn.geosprite.eosdata.dao.DataGranuleRepository;
 import cn.geosprite.eosdata.dataGranuleUtils.DataGranules;
 import cn.geosprite.eosdata.entity.DataGranule;
 import cn.geosprite.eosdata.enums.FormatCode;
-import cn.geosprite.eosdata.service.PreProcessService;
 import cn.geosprite.eosdata.service.ProcessService;
 import cn.geosprite.eosprocess.service.LasrcService;
 import cn.geosprite.eosprocess.service.BandMathService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.beanutils.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -102,8 +99,10 @@ public class ProcessServiceImpl implements ProcessService {
                 String pngPath = pathConfigs.inputPath + ndviPng.getDataGranulePath();
                 String tiffPath = pathConfigs.inputPath + ndviTiff.getDataGranulePath();
 
+                log.info("start calculating ndvi for {}", dataGranule.toString());
                 //这里有点问题，getNdvi应该处理多幅影像
                 bandMathService.getNDVI(inputPath, pngPath, tiffPath);
+                log.info("ndvi calculation has ended");
 //                dataGranule = Utils.convertDataGranule(dataGranule,FormatCode.NDVI);
 //                dataService.save(dataGranule);
                 dataGranuleRepository.save(ndviPng);

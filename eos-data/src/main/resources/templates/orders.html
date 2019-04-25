@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Order</title>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+</head>
+<body>
+<div class="col-md-9 column">
+    <!--订单列表-->
+    <table class="table">
+        <thead class="thead-dark">
+        <tr>
+            <th>orderId</th>
+            <th>dataSensorName</th>
+            <th>dataProductName</th>
+            <th>startPath</th>
+            <th>endPath</th>
+            <th>startRow</th>
+            <th>endRow</th>
+            <th>dataStartDate</th>
+            <th>dataEndDate</th>
+            <th>orderSubmittedTime</th>
+            <th>orderCompletedTime</th>
+            <th colspan="2">options</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!--        <tr th:each="">  12列-->
+        <td th:text="${orderOutputDTO.getOrderId()}">1</td>
+        <td th:text="${orderOutputDTO.getDataSensorName()}">2</td>
+        <td style="" th:text="${orderOutputDTO.getDataProductName()}">3</td>
+        <td th:text="${orderOutputDTO.getStartPath()}">4</td>
+        <td th:text="${orderOutputDTO.getStartPath()}">5</td>
+        <td th:text="${orderOutputDTO.getStartPath()}">6</td>
+        <td th:text="${orderOutputDTO.getStartPath()}">7</td>
+        <td th:text="${orderOutputDTO.getStartPath()}">8</td>
+        <td th:text="${orderOutputDTO.getStartPath()}">9</td>
+        <td th:text="${orderOutputDTO.getStartPath()}">10</td>
+        <td th:text="${orderOutputDTO.getStartPath()}">11</td>
+        <td>
+            <button href="#myModal" id="openBtn" data-toggle="modal"
+                    class="btn btn-outline-primary" th:action="@{/data}">
+                订单数据详情
+            </button>
+        </td>
+        <td>
+            <button href="#" id="deleteBtn" class="btn btn-outline-danger"
+                    th:action="@{/data/postOrder/orderDetail(orderId=${orderOutputDTO.getOrderId()})}">
+                取消订单
+            </button>
+        </td>
+        <!--        </tr>-->
+        </tbody>
+    </table>
+
+
+<!--订单详情-->
+    <div class="modal fade" id="myModal" th:fragment="modal">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">订单详情</h3>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                </div>
+                <div class="modal-body">
+                    <h5 class="text-center">数据集详情</h5>
+                    <table class="table table-striped" id="tblGrid">
+                        <thead id="tblHead">
+                        <tr>
+                            <th>dataSensorName</th>
+                            <th>dataProductName</th>
+                            <th>productCode</th>
+                            <th>tileCode</th>
+                            <th>sceneDate</th>
+                            <th>formatCode</th>
+                            <th>dataSource</th>
+                            <th colspan="2">options</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="dataGranule : ${dataGranules}">
+                                <td th:text="${{dataGranule.getDataGranuleId()}}">PENDING</td>
+                                <td th:text="${{dataGranule.getSensorCode()}}">PENDING</td>
+                                <td th:text="${{dataGranule.getProductCode()}}">PENDING</td>
+                                <td th:text="${{dataGranule.tileCode}}">PENDING</td>
+                                <td th:text="${{dataGranule.getSceneDate()}}">PENDING</td>
+                                <td th:text="${{dataGranule.getFormatCode()}}">PENDING</td>
+                                <td th:text="${{dataGranule.getDataSource()}}">PENDING</td>
+                                <td><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" data-whatever="@mdo">Open modal for @mdo</button></td>
+                                <td><a th:href="@{/data/getAll/(page=${dataGranules.getTotalPages()})}">Order</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!--分页-->
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default " data-dismiss="modal">Close</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+</div>
+
+</body>
+<script src="../static/js/pop.js" th:src="@{/js/pop.js}"></script>
+<link rel="stylesheet" type="text/css" href="../static/css/style.css" th:href="@{/css/style.css}"/>
+
+</html>
