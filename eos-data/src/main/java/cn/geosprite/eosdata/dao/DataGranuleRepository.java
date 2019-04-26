@@ -32,6 +32,7 @@ public interface DataGranuleRepository extends JpaRepository<DataGranule, String
             value = "SELECT * from data_granules as a inner join order_data_granules as b on a.data_granule_id = b.data_granule_id where b.order_id = ?1 ;")
     List<DataGranule> findDataGranulesByOrderDataGranuleId(int i);
 
+
     @Query(value =
             "select u from DataGranule u where u.productCode = ?1 And u.sensorCode = ?2 " +
                     "and u.sceneDate between ?3 and ?4 " +
@@ -49,21 +50,23 @@ public interface DataGranuleRepository extends JpaRepository<DataGranule, String
                                  Pageable pageable);
 
     /**
-     * 根据查询条件返回符合的数据，通过分页进行展示
+     * **数据产品查询**，
+     * 根据查询条件返回符合的
+     * 通过分页进行展示
      * 查询条件包括
      * 1.sensor
      * 2.path, row
      * 3.date
-     * 4.productCode
+     * 4.productCode 由于这里查询的是原始数据，肯定不能按照数据产品查询。
      */
 
     @Query(value =
-            "select u from DataGranule u where u.productCode = ?1 And u.sensorCode = ?2 " +
-                    "and u.sceneDate between ?3 and ?4 " +
-                    "and  substring(u.tileCode,1, 3) between ?5 and  ?6 " +
-                    "and  substring(u.tileCode,5, 3) between ?7 and  ?8 " +
+            "select u from DataGranule u where  u.sensorCode = ?1 " +
+                    "and u.sceneDate between ?2 and ?3 " +
+                    "and  substring(u.tileCode,1, 3) between ?4 and  ?5 " +
+                    "and  substring(u.tileCode,5, 3) between ?6 and  ?7 " +
                     "order by u.sceneDate asc")
-    List<DataGranule> findByTile(String productCode,
+    List<DataGranule> findDataGranuleProductByTile(String productCode,
                                  String sensorCode,
                                  Date startDate,
                                  Date endDate,
@@ -72,20 +75,46 @@ public interface DataGranuleRepository extends JpaRepository<DataGranule, String
                                  String startRow,
                                  String endRow);
 
+    /** **查询符合条件的数据产品Id**
+     * productCode 由于这里查询的是原始数据，肯定不能按照数据产品查询。
+     * 1.sensor
+     * 2.path, row
+     * 3.date
+     * */
     @Query(value =
-            "select u.dataGranuleId from DataGranule u where u.productCode = ?1 And u.sensorCode = ?2 " +
+            "select dataGranuleId from DataGranule u where u.productCode = ?1 And u.sensorCode = ?2 " +
                     "and u.sceneDate between ?3 and ?4 " +
                     "and  substring(u.tileCode,1, 3) between ?5 and  ?6 " +
                     "and  substring(u.tileCode,5, 3) between ?7 and  ?8 " +
                     "order by u.sceneDate asc" )
-    List<String> findDataGranuleIdByTile(String productCode,
-                                               String sensorCode,
-                                               Date startDate,
-                                               Date endDate,
-                                               String startPath,
-                                               String endPath,
-                                               String startRow,
-                                               String endRow);
+    List<DataGranule> findDataGranuleProductIdByTile(String productCode,
+                                                String sensorCode,
+                                                Date startDate,
+                                                Date endDate,
+                                                String startPath,
+                                                String endPath,
+                                                String startRow,
+                                                String endRow);
+
+    /** **查询符合条件的数据产品Id**
+     * productCode 由于这里查询的是原始数据，肯定不能按照数据产品查询。
+     * 1.sensor
+     * 2.path, row
+     * 3.date
+     * */
+    @Query(value =
+            "select u.dataGranuleId from DataGranule u where " +
+                    "u.sensorCode = ?1 " +
+                    "and u.sceneDate between ?2 and ?3 " +
+                    "and  substring(u.tileCode,1, 3) between ?4 and  ?5 " +
+                    "and  substring(u.tileCode,5, 3) between ?6 and  ?7 ")
+    List<DataGranule> findDataGranuleRawIdByTile(String sensorCode,
+                                            Date startDate,
+                                            Date endDate,
+                                            String startPath,
+                                            String endPath,
+                                            String startRow,
+                                            String endRow);
 }
 
 

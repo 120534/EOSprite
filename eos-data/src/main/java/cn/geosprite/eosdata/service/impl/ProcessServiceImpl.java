@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -101,7 +102,10 @@ public class ProcessServiceImpl implements ProcessService {
 
                 log.info("start calculating ndvi for {}", dataGranule.toString());
                 //这里有点问题，getNdvi应该处理多幅影像
-                bandMathService.getNDVI(inputPath, pngPath, tiffPath);
+
+                List<Integer> bandNums = Arrays.asList(4,5);
+
+                bandMathService.doNDVI(inputPath, pngPath, tiffPath);
                 log.info("ndvi calculation has ended");
 //                dataGranule = Utils.convertDataGranule(dataGranule,FormatCode.NDVI);
 //                dataService.save(dataGranule);
@@ -132,7 +136,7 @@ public class ProcessServiceImpl implements ProcessService {
                 String tiffPath = pathConfigs.inputPath + ndwiTiff.getDataGranulePath();
 
                 //这里有点问题，getNdvi应该处理多幅影像
-                bandMathService.getNDWI(inputPath, pngPath, tiffPath);
+                bandMathService.doNDWI(inputPath, pngPath, tiffPath);
 //                dataGranule = Utils.convertDataGranule(dataGranule,FormatCode.NDVI);
 //                dataService.save(dataGranule);
                 dataGranuleRepository.save(ndwiPng);

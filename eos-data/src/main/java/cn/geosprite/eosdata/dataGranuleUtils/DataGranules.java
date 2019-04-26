@@ -34,7 +34,7 @@ public class DataGranules {
      */
     public static DataGranule converter(DataGranule dataGranule, FormatCode fc){
 //  LC08/L1TP_C1_T1/TGZ/117/050/2019/01/11		LC08	L1TP_C1_T1	117/050	2019-01-11	 TGZ  USGS	LC08/L1TP_C1_T1/TGZ/117/050/2019/01/11/LC81170502019011LGN00.tgz
-//  LC08/L1TP_C1_T1_SR/DIR/117/050/2018/12/26	LC08      L1TP_C1_T1_SR	117/050	2018-12-26	TIFF  USGS	LC08/L1TP_C1_T1_SR/DIR/117/050/2018/12/26/LC81170502018360LGN00
+//  LC08/L1TP_C1_T1_SR/DIR/117/050/2018/12/26        LC08      L1TP_C1_T1_SR	117/050	2018-12-26	TIFF  USGS	LC08/L1TP_C1_T1_SR/DIR/117/050/2018/12/26/LC81170502018360LGN00
 
         //先判断目标和现有类型是否一致，如果相同则报错。
         if (!dataGranule.getProductCode().equalsIgnoreCase(fc.getProductCode()) ||
@@ -73,18 +73,25 @@ public class DataGranules {
         return srcId.replace(srcDataFormat,fc.getFormat()).replace(srcProductCode, fc.getProductCode());
     }
 
-    /** path里面需要替换id，以及文件名。
+    /** 生成path，这个path转换包括三种情况，TGZ -> DIR , DIR -> SR , SR -> (NDVI, ALBEDO, etc...)
+     * 后期还需要添加 (NDVI, ALBEDO, etc...) -> Others
      * @param dataGranule
      * @param fc
      * @return
      */
     private static String convertPath(DataGranule dataGranule, FormatCode fc){
+
+        //原始数据信息
         String path = dataGranule.getDataGranulePath();
         List<String> list = Splitter.on("/").trimResults().omitEmptyStrings().splitToList(path);
         String dataName = list.get(list.size() - 1);
         String id = dataGranule.getDataGranuleId();
         String formatCode = dataGranule.getFormatCode();
+        /** 如 L1TP_C1_T1_NDVI */
         String productCode = dataGranule.getProductCode();
+        /** 如 NDVI */
+        List<String> names = Splitter.on("_").trimResults().omitEmptyStrings().splitToList(productCode);
+        String productName = names.get(names.size() - 1);
 
         // 在修改文件名的时候需要考虑到，原始数据存储的格式，是文件夹还是带有后缀。
         // 同时还要考虑到转换的类型是文件夹还是其他数据。 TGZ -> DIR , DIR -> SR , SR -> (NDVI, ALBEDO, etc...)
@@ -95,7 +102,7 @@ public class DataGranules {
         }else if (productCode.equalsIgnoreCase(FormatCode.DIR.getProductCode())&& formatCode.equalsIgnoreCase(FormatCode.DIR.getFormat())){
             path = path.replace(id, convertId(dataGranule, fc));
         }else if (productCode.equalsIgnoreCase(FormatCode.SR.getProductCode())&& formatCode.equalsIgnoreCase(FormatCode.SR.getFormat())){
-            path = path.replace(id, convertId(dataGranule, fc)).replace(dataName, dataName+ "." + fc.getFormat());
+            path = path.replace(id, convertId(dataGranule, fc)).replace(dataName, dataName + "_" + productName+"." + fc.getFormat());
         }else {
             log.error("No format code matched for {}", dataGranule.toString());
             throw new RuntimeException("No format code matched");

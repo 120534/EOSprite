@@ -29,34 +29,32 @@
         </tr>
         </thead>
         <tbody>
-        <!--        <tr th:each="">  12列-->
-        <td th:text="${orderOutputDTO.getOrderId()}">1</td>
-        <td th:text="${orderOutputDTO.getDataSensorName()}">2</td>
-        <td style="" th:text="${orderOutputDTO.getDataProductName()}">3</td>
-        <td th:text="${orderOutputDTO.getStartPath()}">4</td>
-        <td th:text="${orderOutputDTO.getStartPath()}">5</td>
-        <td th:text="${orderOutputDTO.getStartPath()}">6</td>
-        <td th:text="${orderOutputDTO.getStartPath()}">7</td>
-        <td th:text="${orderOutputDTO.getStartPath()}">8</td>
-        <td th:text="${orderOutputDTO.getStartPath()}">9</td>
-        <td th:text="${orderOutputDTO.getStartPath()}">10</td>
-        <td th:text="${orderOutputDTO.getStartPath()}">11</td>
-        <td>
-            <button href="#myModal" id="openBtn" data-toggle="modal"
-                    class="btn btn-outline-primary" th:action="@{/data}">
-                订单数据详情
-            </button>
-        </td>
-        <td>
-            <button href="#" id="deleteBtn" class="btn btn-outline-danger"
-                    th:action="@{/data/postOrder/orderDetail(orderId=${orderOutputDTO.getOrderId()})}">
-                取消订单
-            </button>
-        </td>
-        <!--        </tr>-->
+            <tr>
+                <td th:text="${orderOutputDTO.getOrderId()}">1</td>
+                <td th:text="${orderOutputDTO.getDataSensorName()}">2</td>
+                <td style="" th:text="${orderOutputDTO.getDataProductName()}">3</td>
+                <td th:text="${orderOutputDTO.getStartPath()}">4</td>
+                <td th:text="${orderOutputDTO.getEndPath()}">5</td>
+                <td th:text="${orderOutputDTO.getStartRow()}">6</td>
+                <td th:text="${orderOutputDTO.getEndRow()}">7</td>
+                <td th:text="${orderOutputDTO.getDataStartDate()}">8</td>
+                <td th:text="${orderOutputDTO.getDataEndDate()}">9</td>
+                <td th:text="${#dates.format(orderOutputDTO.getOrderSubmittedTime(), 'yyyy-MM-dd HH:mm:ss')}">10</td>
+                <td th:text="${orderOutputDTO.getOrderCompletedTime()}==null ? '正在处理':${#dates.format(orderOutputDTO.getOrderCompletedTime(), 'yyyy-MM-dd HH:mm:ss')}">11</td>
+                <td>
+                    <button href="#myModal" id="openBtn" data-toggle="modal"
+                            class="btn btn-outline-primary">
+                        订单数据详情
+                    </button>
+                </td>
+                <td>
+                    <button href="#" id="deleteBtn" class="btn btn-outline-danger">
+                        取消订单
+                    </button>
+                </td>
+            </tr>
         </tbody>
     </table>
-
 
 <!--订单详情-->
     <div class="modal fade" id="myModal" th:fragment="modal">
@@ -73,25 +71,27 @@
                         <tr>
                             <th>dataSensorName</th>
                             <th>dataProductName</th>
-                            <th>productCode</th>
+                            <th>identifier</th>
                             <th>tileCode</th>
                             <th>sceneDate</th>
                             <th>formatCode</th>
                             <th>dataSource</th>
+                            <th>dataGranuleUri</th>
                             <th colspan="2">options</th>
                         </tr>
                         </thead>
                         <tbody>
-                            <tr th:each="dataGranule : ${dataGranules}">
-                                <td th:text="${{dataGranule.getDataGranuleId()}}">PENDING</td>
-                                <td th:text="${{dataGranule.getSensorCode()}}">PENDING</td>
-                                <td th:text="${{dataGranule.getProductCode()}}">PENDING</td>
-                                <td th:text="${{dataGranule.tileCode}}">PENDING</td>
-                                <td th:text="${{dataGranule.getSceneDate()}}">PENDING</td>
-                                <td th:text="${{dataGranule.getFormatCode()}}">PENDING</td>
-                                <td th:text="${{dataGranule.getDataSource()}}">PENDING</td>
-                                <td><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" data-whatever="@mdo">Open modal for @mdo</button></td>
-                                <td><a th:href="@{/data/getAll/(page=${dataGranules.getTotalPages()})}">Order</a></td>
+                            <tr th:each="dataGranuleOutputDTO : ${dataGranuleOutputDTOs}">
+                                <td th:text="${dataGranuleOutputDTO.getDataSensorName}">PENDING</td>
+                                <td th:text="${dataGranuleOutputDTO.getDataProductName}">PENDING</td>
+                                <td th:text="${dataGranuleOutputDTO.getIdentifier}">PENDING</td>
+                                <td th:text="${dataGranuleOutputDTO.getTileCode}">PENDING</td>
+                                <td th:text="${dataGranuleOutputDTO.getSceneDate}">PENDING</td>
+                                <td th:text="${dataGranuleOutputDTO.getFormatCode}">PENDING</td>
+                                <td th:text="${dataGranuleOutputDTO.getDataSource}">PENDING</td>
+                                <td th:text="${dataGranuleOutputDTO.getDataGranuleUri}">PENDING</td>
+                                <td><button type="button" class="btn btn-primary">download</button></td>
+                                <td><button type="button" class="btn btn-primary">cancel</button></td>
                             </tr>
                         </tbody>
                     </table>

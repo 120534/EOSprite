@@ -3,12 +3,14 @@ package cn.geosprite.eosprocess.service
 import java.io.File
 
 import astraea.spark.rasterframes._
+import cn.geosprite.eosprocess.utils.Utils
 import geotrellis.raster.io.geotiff.SinglebandGeoTiff
 import org.apache.spark.SparkContext
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.{ColumnName, SparkSession}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import cn.geosprite.eosprocess.utils.Utils._
+import geotrellis.raster.render.ColorMap
 import lombok.extern.slf4j.Slf4j
 import org.slf4j.Logger
 
@@ -37,61 +39,40 @@ class BandMathService {
     * @param outputPathPng
     * @param outputPathTiff
     */
-  def getNDVI(inputPath: String, outputPathPng: String, outputPathTiff:String): Unit = {
-    //for example, the name is "L8-Elkton-VA.tiff"
-    implicit val ss: SparkSession = spark.withRasterFrames
-    import ss.implicits._
-    log.info("Starting calculating ndvi for image path {}",inputPath)
-    //根据路径找到对应的sr影像
-    val paths = findTiffPath(inputPath)
-
-    val bandNums = (4 to 5).toList
-
-    val joinedRF = bandNums.
-      map { b => (b, readTiff(paths(b))) }.
-      map { case (b, t) => t.projectedRaster.toRF(s"band_$b") }.
-      reduce(_ spatialJoin _)
-
-    val metadata = joinedRF.tileLayerMetadata.left.get
-    val tlm = metadata.tileLayout
-
-    val rf = joinedRF.withColumn("ndvi",
-      normalized_difference(convert_cell_type($"band_5", "float32"),
-        convert_cell_type($"band_4", "float32"))).asRF
-
-    val raster_ndvi = rf.toRaster($"ndvi", tlm.totalCols.toInt, tlm.totalRows.toInt)
-
-    //创建输出文件目录 LC08/L1TP_C1_T1_NDVI/TIFF/117/050/2019/01/11/LC81170502019011LGN00.TIF
-    val arrPng = outputPathPng.split("/")
-    val dirPng = arrPng.take(arrPng.length - 1).mkString("/")
-
-    val arrTiff = outputPathTiff.split("/")
-    val dirTiff = arrTiff.take(arrTiff.length - 1).mkString("/")
-
-    mkdir(dirPng)
-    mkdir(dirTiff)
-
-    //输出png图片
-    log.info("output ndvi png image result to {}",outputPathPng)
-    raster_ndvi.tile.renderPng(ndvi_colorMap).write(outputPathPng)
-
-    //输出tiff文件
-    log.info("output ndvi tiff image result to {}",outputPathTiff)
-    SinglebandGeoTiff(raster_ndvi, metadata.extent, metadata.crs).write(outputPathTiff)
+  def doNDVI(inputPath: String, outputPathPng: String, outputPathTiff:String): Unit = {
+    val bandNums = List(4, 5)
+    doNDIndex(inputPath, bandNums, outputPathPng, outputPathTiff, ndvi_colorMap)
   }
 
   /**
     * NDWI = (绿波段 - 近红外波段) / (绿波段 + 近红外波段)
     * landsat8: NDWI = (band3 - band5) / (band3 + band5)
     */
-  def getNDWI(inputPath: String, outputPathPng: String, outputPathTiff:String): Unit={
+  def doNDWI(inputPath: String, outputPathPng: String, outputPathTiff:String): Unit={
+    val bandNums = List(3, 5)
+    doNDIndex(inputPath, bandNums, outputPathPng, outputPathTiff, ndwi_colorMap)
+  }
+
+  /**
+    *a common method to get normal difference index,suitable for XXX = (band(x) - band(y)) / (band(x) + band(y))
+    * @Param band(Int, Int), the first param is for the head band, and the second param is for the second band
+    *       , be careful with the sequence.
+    */
+  def doNDIndex(inputPath: String,
+                 bandNums: List[Int] ,
+                 outputPathPng: String,
+                 outputPathTiff:String,
+                 colorMap: ColorMap
+                ):Unit = {
+    if (bandNums.length != 2){
+      throw new AssertionError("Calculating NDIndex with bandNums count less than two")
+    }
+
     implicit val ss: SparkSession = spark.withRasterFrames
     import ss.implicits._
-    log.info("Starting calculating ndvi for image path {}",inputPath)
+    log.info("Starting calculating normal difference index for image with path ={}",inputPath)
     //根据路径找到对应的sr影像
     val paths = findTiffPath(inputPath)
-    val bandNums = List(3, 5)
-    val band = List(3, 5)
 
     val joinedRF = bandNums.
       map { b => (b, readTiff(paths(b))) }.
@@ -101,11 +82,14 @@ class BandMathService {
     val metadata = joinedRF.tileLayerMetadata.left.get
     val tlm = metadata.tileLayout
 
-    val rf = joinedRF.withColumn("nwvi",
-      normalized_difference(convert_cell_type($"band_3", "float32"),
-        convert_cell_type($"band_5", "float32"))).asRF
+    val cn1:ColumnName = new ColumnName(StringContext("band_","").s(bandNums.head))
+    val cn2:ColumnName = new ColumnName(StringContext("band_","").s(bandNums.last))
 
-    val raster_ndwi = rf.toRaster($"nwvi", tlm.totalCols.toInt, tlm.totalRows.toInt)
+    val rf = joinedRF.withColumn("index",
+      normalized_difference(convert_cell_type(cn1, "float32"),
+        convert_cell_type(cn2, "float32"))).asRF
+
+    val raster = rf.toRaster($"index", tlm.totalCols.toInt, tlm.totalRows.toInt)
 
     //创建输出文件目录 LC08/L1TP_C1_T1_NDVI/TIFF/117/050/2019/01/11/LC81170502019011LGN00.TIF
     val arrPng = outputPathPng.split("/")
@@ -119,28 +103,29 @@ class BandMathService {
 
     //输出png图片
     log.info("output ndvi png image result to {}",outputPathPng)
-    raster_ndwi.tile.renderPng(ndwi_colorMap).write(outputPathPng)
+    raster.tile.renderPng(colorMap).write(outputPathPng)
 
     //输出tiff文件
     log.info("output ndvi tiff image result to {}",outputPathTiff)
-    SinglebandGeoTiff(raster_ndwi, metadata.extent, metadata.crs).write(outputPathTiff)
+    SinglebandGeoTiff(raster, metadata.extent, metadata.crs).write(outputPathTiff)
 
   }
+
   //归一化建筑指数  (MIR-NIR)/(MIR+NIR)
-  def getNDBI(): Unit ={
+  def doNDBI(): Unit ={
 
 
   }
 //  def getTGSI(blue:Tile,green:Tile,red:Tile): Unit ={
 //    (red - blue)/(red + blue + green)
 //  }
-  def getTGSI()={}
+  def doTGSI()={}
 
 //  def getMSAVI(red:Tile,nir:Tile):Tile = {
 //    (nir * 2 + 1 - Abs(Sqrt((nir * 2 + 1) * (nir * 2 + 1) - (nir - red) * 8))) / 2
 //    //  （2*float(b5)+1-abs(sqrt((2*float(b5)+1)*(2*float(b5)+1)-8*(float(b5)-float(b4))))/2
 //  }
-  def getMSAVI(){}
+  def doMSAVI(){}
 
 
 }

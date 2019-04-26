@@ -69,14 +69,23 @@ public class DataController {
      * index界面提交order订单后，返回orders信息到前台。
      */
     @RequestMapping(value = "/postOrder", method=RequestMethod.POST)
-    public ModelAndView saveOrderAndReturnOrder(OrderInputDTO oderInputDTO)
+    public ModelAndView saveOrderAndReturnOrder(OrderInputDTO oderInputDTO,
+                                                @RequestParam(defaultValue = "1" ) Integer page,
+                                                @RequestParam(defaultValue = "5" ) Integer size)
     {
         ModelAndView  modelAndView = new ModelAndView("orders.html");
         OrderOutputDTO orderOutputDTO = dataService.orderReply(oderInputDTO);
+        Integer orderId = orderOutputDTO.getOrderId();
+        /** 把分页信息返回给页面 */
+        PageRequest pageRequest = PageRequest.of(page - 1, size);
+        Page<DataGranuleOutputDTO> dataGranuleOutputDTOs =
+                dataService.findDataGranuleOutputDTOByOrderId(orderId, pageRequest);
+
         modelAndView.addObject("orderOutputDTO",orderOutputDTO);
+        modelAndView.addObject("dataGranuleOutputDTOs", dataGranuleOutputDTOs);
+
         return modelAndView;
     }
-
 
     @RequestMapping(value = "/postOrder/orderDetail", method=RequestMethod.GET)
     @ResponseBody
@@ -87,7 +96,7 @@ public class DataController {
         PageRequest pageRequest = PageRequest.of(page, size);
 
         Page<DataGranuleOutputDTO> dataGranuleOutputDTOs =
-                dataService.finddataGranuleOutputDTOByOrderId(orderId, pageRequest);
+                dataService.findDataGranuleOutputDTOByOrderId(orderId, pageRequest);
 
         return dataGranuleOutputDTOs;
     }
