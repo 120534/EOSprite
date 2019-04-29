@@ -10,9 +10,9 @@ import cn.geosprite.eosdata.dto.OrderOutputDTO;
 import cn.geosprite.eosdata.entity.DataGranule;
 import cn.geosprite.eosdata.entity.OrderDataGranule;
 import cn.geosprite.eosdata.entity.Orders;
-import cn.geosprite.eosdata.enums.FormatCode;
+import cn.geosprite.eosdata.enums.LandsatFormatCode;
 import cn.geosprite.eosdata.service.DataService;
-import com.google.common.base.Joiner;
+import org.apache.hadoop.yarn.webapp.hamlet.Hamlet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,12 +20,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.criteria.*;
-import java.sql.Date;
-import java.text.SimpleDateFormat;
+import javax.xml.crypto.Data;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -94,8 +90,8 @@ public class DataServiceImpl implements DataService {
          * 根据order信息，查询符合条件的dataGranule信息，然后存储到order_data_granule中
          */
         List<OrderDataGranule> orderDataGranules = findDataGranuleIdByTile(orders1);
-        orderDataGranuleRepository.saveAll(orderDataGranules);
-        findDataGranuleIdByTile(orders1);
+        List<OrderDataGranule> orderDataGranules1 = orderDataGranuleRepository.saveAll(orderDataGranules);
+
         //重新以分页order信息返回
         return orderDataGranuleRepository.findOrderDataGranulesByOrderId(id, pageable);
     }
@@ -103,10 +99,9 @@ public class DataServiceImpl implements DataService {
          * 根据order信息，查询符合条件的dataGranule信息，然后存储到order_data_granule中并返回
          */
 
-
     private  List<OrderDataGranule> findDataGranuleIdByTile(Orders orders){
         Integer id = orders.getOrderId();
-        List<DataGranule> dataGranules = dataGranuleRepository.findDataGranuleProductByTile(
+        List<DataGranule> dataGranules = dataGranuleRepository.findDataGranuleProductIdByTile(
                 orders.getDataProductName(),
                 orders.getDataSensorName(),
                 orders.getDataStartDate(),
@@ -114,7 +109,8 @@ public class DataServiceImpl implements DataService {
                 orders.getStartPath(),
                 orders.getEndPath(),
                 orders.getStartRow(),
-                orders.getEndRow()
+                orders.getEndRow(),
+                "TIFF"
         );
         return dataGranules.stream().map(x -> new OrderDataGranule().setOrderId(id).setDataGranule(x)).collect(Collectors.toList());
     }
@@ -126,46 +122,76 @@ public class DataServiceImpl implements DataService {
      * 写到order_data_granule表中，
      * 处理dataGranule数据
      */
-    public OrderOutputDTO orderReply(OrderInputDTO orderInputDTO){
+    public OrderOutputDTO orderInfoReply(OrderInputDTO orderInputDTO){
         Orders orders = orderInputDTO.converToOrders();
         //存储订单信息
         Orders orders1 = ordersRepository.save(orders);
-        //更新dataGranule信息，并进行数据处理
+        return orderInputDTO.convertToOrderOutputDTO(orders1);
+    }
 
+    /**
+     * 返回订单的详细信息给modal
+     * 也就是OrderDataGranule信息
+     */
+    public List<DataGranuleOutputDTO> orderDetailInfoReply(OrderOutputDTO orderOutputDTO){
+
+        Integer orderId = orderOutputDTO.getOrderId();
+        Orders orders1 = ordersRepository.findByOrderId(orderId);
+        //如 L1TP_C1_T1_NDVI
+        String productName = orders1.getDataProductName();
         /**
-         * 首先对没有数据产品的dataGranule数据信息进行提前生成入库，
-         * 数据处理完成后，产品dataGranule信息里面写入URI提供下载地址。
-         * 再对DataGranule进行查询，符合条件的存入orderDataGranule库
+         * 查询完全满足条件的DataGranule信息，写入OrderDataGranule表中,
          */
-
-        List<DataGranule> rawDataGranule = findRawDataByOrder(orders1);
         List<DataGranule> productDataGranule = findProductDataByOrder(orders1);
-        /***/
-        List<DataGranule> converted = rawDataGranule.stream().map(x ->
-                DataGranules.converter(x, FormatCode.SR)).collect(Collectors.toList());
+        /**
+         * 对没有符合条件的数据产品dataGranule进行提前生成数据产品信息入库，
+         * 确保OrderDataGranule表已经写入信息，可以返回给前端。
+         */
+        List<DataGranule> rawDataGranule = findRawDataByOrder(orders1);
 
-        converted.removeAll(productDataGranule);
+        /**使用两给List是为了后面，对converted进行remove，如果再添加product进去，数据的顺序会出问题。*/
+        List<DataGranule> result = new ArrayList<>();
+        List<DataGranule> converted = new ArrayList<>();
+        /**应该返回的dataGranule产品信息*/
+        for (DataGranule dataGranule :rawDataGranule){
+            result.add(DataGranules.converterForward(dataGranule, LandsatFormatCode.fromProductCode(productName)));
+            converted.add(DataGranules.converterForward(dataGranule, LandsatFormatCode.fromProductCode(productName)));
+        }
+        /**把新的dataGranule产品信息入库，需要先出去掉已经有的产品信息，防止重复插入数据*/
+        if (!productDataGranule.isEmpty()){
+            converted.removeAll(productDataGranule);
+        }
+        /**查询orderDataGranule，写入到OrderDataGranule表中*/
         dataGranuleRepository.saveAll(converted);
 
-        /**需要声明异步执行，要不是在处理数据就无法返回信息*/
-        //TODO:对接添加数据处理
+        List<OrderDataGranule> orderDataGranules = result
+                .stream()
+                .map(x -> new OrderDataGranule().setOrderId(orderId).setDataGranule(x)).collect(Collectors.toList());
 
-        List<OrderDataGranule> orderDataGranules = findDataGranuleIdByTile(orders1);
-        orderDataGranuleRepository.saveAll(orderDataGranules);
-
-        return orderInputDTO.convertToOrderOutputDTO(orders1);
+        List<OrderDataGranule> dataGranuleOutputDTOs = orderDataGranuleRepository.saveAll(orderDataGranules);
+        return dataGranuleOutputDTOs.stream()
+                .map(x -> DataGranuleOutputDTO.converToDataGranuleOutputDTO(x.getDataGranule()))
+                .collect(Collectors.toList());
     }
 
     /**
      * 根据orderId,查询得到orderDataGranule
      * 将orderDataGranule，转换为OrderDataGranule
-     * 最后返回page<DataGranuleOutputDTO> 给modal界面
+     * 最后返回page<DataGranuleOutputDTO> 给modal界面,分页显示
      */
     public Page<DataGranuleOutputDTO> findDataGranuleOutputDTOByOrderId(Integer orderId, Pageable pageable){
-
         Page<OrderDataGranule> page = orderDataGranuleRepository.findOrderDataGranulesByOrderId(orderId,pageable);
         return page.map(x -> DataGranuleOutputDTO.converToDataGranuleOutputDTO(x.getDataGranule()));
+    }
 
+    /**
+     * 根据orderId,查询得到orderDataGranule
+     * 将orderDataGranule，转换为OrderDataGranule
+     * 最后返回page<DataGranuleOutputDTO> 给modal界面，滑动显示
+     */
+    public List<DataGranuleOutputDTO> findDataGranuleOutputDTOByOrderId(Integer orderId){
+       List<OrderDataGranule> list =  orderDataGranuleRepository.findOrderDataGranulesByOrderId(orderId);
+       return list.stream().map(x -> DataGranuleOutputDTO.converToDataGranuleOutputDTO(x.getDataGranule())).collect(Collectors.toList());
     }
 
 
@@ -177,23 +203,10 @@ public class DataServiceImpl implements DataService {
         return orders.getOrderCompletedTime()!= null;
     }
 
-    public List<DataGranule> findDataGranuleByTile(Orders orders) {
-        return dataGranuleRepository.findDataGranuleProductByTile(
-                orders.getDataProductName(),
-                orders.getDataSensorName(),
-                orders.getDataStartDate(),
-                orders.getDataEndDate(),
-                orders.getStartPath(),
-                orders.getEndPath(),
-                orders.getStartRow(),
-                orders.getEndRow()
-        );
-    }
+
 
     /**
-     * 根据orderID 返回对应的所有对应的dataGranule信息
-     * 如果已经处理过信息入库，那么返回库里面对应的数据产品信息；
-     * 如果没有处理过，那么返回原始数据信息。
+     * 根据order 返回对应订单对应的所有原始dataGranule信息
      * @param orders
      * @return
      */
@@ -211,7 +224,8 @@ public class DataServiceImpl implements DataService {
                     orders.getStartPath(),
                     orders.getEndPath(),
                     orders.getStartRow(),
-                    orders.getEndRow()
+                    orders.getEndRow(),
+                    "TGZ"
             );
         }else {
             //TODO:add methods for other dataSets
@@ -219,11 +233,11 @@ public class DataServiceImpl implements DataService {
         }
     }
 
+    /** 根据order条件，查询已经处理过的完全符合条件的数据产品*/
     public List<DataGranule> findProductDataByOrder(Orders orders) {
         String sensorName = orders.getDataSensorName();
         String landsatSensorName = "LC08";
         if (landsatSensorName.equalsIgnoreCase(sensorName)) {
-            /** 完全符合条件的数据产品*/
             return dataGranuleRepository.findDataGranuleProductIdByTile(
                     orders.getDataProductName(),
                     orders.getDataSensorName(),
@@ -232,11 +246,14 @@ public class DataServiceImpl implements DataService {
                     orders.getStartPath(),
                     orders.getEndPath(),
                     orders.getStartRow(),
-                    orders.getEndRow()
+                    orders.getEndRow(),
+                    "TIFF"
             );
         }else {
             throw  new AssertionError("no methods for other dataSets except landsat8");
         }
 
     }
+
+
 }

@@ -4,10 +4,9 @@ import cn.geosprite.eosdata.config.PathConfigs;
 import cn.geosprite.eosdata.dao.DataGranuleRepository;
 import cn.geosprite.eosdata.dataGranuleUtils.DataGranules;
 import cn.geosprite.eosdata.entity.DataGranule;
-import cn.geosprite.eosdata.enums.FormatCode;
+import cn.geosprite.eosdata.enums.LandsatFormatCode;
 import cn.geosprite.eosdata.service.PreProcessService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.beanutils.BeanUtils;
 import org.rauschig.jarchivelib.ArchiveFormat;
 import org.rauschig.jarchivelib.Archiver;
 import org.rauschig.jarchivelib.ArchiverFactory;
@@ -17,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -61,19 +59,13 @@ public class PreProcessServiceImpl implements PreProcessService {
         for (DataGranule dataGranule : dataGranules) {
             //获取数据读取路径
             String inputPath = pathConfigs.inputPath + dataGranule.getDataGranulePath();
-            DataGranule outputDataGranule = DataGranules.converter(dataGranule, FormatCode.DIR);
+            DataGranule outputDataGranule = DataGranules.converter(dataGranule, LandsatFormatCode.DIR);
 
             //数据解压输出路径
             String outputPath = pathConfigs.outputPath + outputDataGranule.getDataGranulePath();
 
             String formatCode = dataGranule.getFormatCode();
             String uri = dataGranule.getDataGranuleUri();
-
-            if (uri != null) {
-                //后期补充
-                DataGranule dataGranule1 = downloadData(dataGranule);
-            }
-
             /**
              *  判断其类型为TGZ的对其进行解压，其他类型不做处理。
              */

@@ -56,6 +56,9 @@ public class DataGranuleOutputDTO {
      */
     private String dataGranuleUri;
 
+    /**预览图*/
+    private String dataGranulePreview;
+
     public static DataGranuleOutputDTO converToDataGranuleOutputDTO(DataGranule dataGranule){
         DataGranuleDTOConvert dataGranuleDTOConvert = new DataGranuleDTOConvert();
         return dataGranuleDTOConvert.doBackward(dataGranule);

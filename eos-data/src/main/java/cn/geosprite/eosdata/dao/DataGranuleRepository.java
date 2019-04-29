@@ -1,26 +1,44 @@
 package cn.geosprite.eosdata.dao;
 
 import cn.geosprite.eosdata.entity.DataGranule;
-import monocle.std.string;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.xml.crypto.Data;
 import java.sql.Date;
-import java.util.Collection;
 import java.util.List;
 
+/**
+ * @ Date       ：Created in 21:14 2019-4-7
+ * @ Description：None
+ * @ Modified By：
+ * @author wanghl
+ */
 
+@SuppressWarnings("AlibabaTransactionMustHaveRollback")
 @Repository
-public interface DataGranuleRepository extends JpaRepository<DataGranule, String>, JpaSpecificationExecutor<DataGranule> {
+public interface DataGranuleRepository extends JpaRepository<DataGranule, String>{
 
+    /**
+     * 更新dataGranuleURI,以及preview
+     * @param id
+     * @param uri
+     * @return
+     */
+    @Modifying
+    @Transactional(rollbackFor = Exception.class)
+    @Query(value = "update DataGranule u set u.dataGranuleUri = ?2, u.dataGranulePreview = ?3 where u.dataGranuleId = ?1 ")
+    void updateDataGranuleURIAndPreview(String id, String uri,String preview);
+
+    /**
+     * 根据id查询DataGranule
+     * @param dataGranuleId
+     * @return
+     */
     DataGranule findDataGranuleByDataGranuleId(String dataGranuleId);
 
     /**
@@ -49,31 +67,6 @@ public interface DataGranuleRepository extends JpaRepository<DataGranule, String
                                  String endRow,
                                  Pageable pageable);
 
-    /**
-     * **数据产品查询**，
-     * 根据查询条件返回符合的
-     * 通过分页进行展示
-     * 查询条件包括
-     * 1.sensor
-     * 2.path, row
-     * 3.date
-     * 4.productCode 由于这里查询的是原始数据，肯定不能按照数据产品查询。
-     */
-
-    @Query(value =
-            "select u from DataGranule u where  u.sensorCode = ?1 " +
-                    "and u.sceneDate between ?2 and ?3 " +
-                    "and  substring(u.tileCode,1, 3) between ?4 and  ?5 " +
-                    "and  substring(u.tileCode,5, 3) between ?6 and  ?7 " +
-                    "order by u.sceneDate asc")
-    List<DataGranule> findDataGranuleProductByTile(String productCode,
-                                 String sensorCode,
-                                 Date startDate,
-                                 Date endDate,
-                                 String startPath,
-                                 String endPath,
-                                 String startRow,
-                                 String endRow);
 
     /** **查询符合条件的数据产品Id**
      * productCode 由于这里查询的是原始数据，肯定不能按照数据产品查询。
@@ -82,10 +75,11 @@ public interface DataGranuleRepository extends JpaRepository<DataGranule, String
      * 3.date
      * */
     @Query(value =
-            "select dataGranuleId from DataGranule u where u.productCode = ?1 And u.sensorCode = ?2 " +
+            "select u from DataGranule u where u.productCode = ?1 And u.sensorCode = ?2 " +
                     "and u.sceneDate between ?3 and ?4 " +
                     "and  substring(u.tileCode,1, 3) between ?5 and  ?6 " +
                     "and  substring(u.tileCode,5, 3) between ?7 and  ?8 " +
+                    "and u.formatCode = ?9 " +
                     "order by u.sceneDate asc" )
     List<DataGranule> findDataGranuleProductIdByTile(String productCode,
                                                 String sensorCode,
@@ -94,7 +88,8 @@ public interface DataGranuleRepository extends JpaRepository<DataGranule, String
                                                 String startPath,
                                                 String endPath,
                                                 String startRow,
-                                                String endRow);
+                                                String endRow,
+                                                     String formatCode);
 
     /** **查询符合条件的数据产品Id**
      * productCode 由于这里查询的是原始数据，肯定不能按照数据产品查询。
@@ -103,7 +98,7 @@ public interface DataGranuleRepository extends JpaRepository<DataGranule, String
      * 3.date
      * */
     @Query(value =
-            "select u.dataGranuleId from DataGranule u where " +
+            "select u from DataGranule u where " +
                     "u.sensorCode = ?1 " +
                     "and u.sceneDate between ?2 and ?3 " +
                     "and  substring(u.tileCode,1, 3) between ?4 and  ?5 " +

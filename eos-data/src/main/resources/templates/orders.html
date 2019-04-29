@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Order</title>
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="../static/js/jquery-3.3.1.min.js" th:src="@{/js/jquery-3.3.1.min.js}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
@@ -25,12 +25,13 @@
             <th>dataEndDate</th>
             <th>orderSubmittedTime</th>
             <th>orderCompletedTime</th>
-            <th colspan="2">options</th>
+            <th>status</th>
+            <th colspan="3">options</th>
         </tr>
         </thead>
         <tbody>
             <tr>
-                <td th:text="${orderOutputDTO.getOrderId()}">1</td>
+                <td id="td-order-id" th:text="${orderOutputDTO.getOrderId()}">padding</td>
                 <td th:text="${orderOutputDTO.getDataSensorName()}">2</td>
                 <td style="" th:text="${orderOutputDTO.getDataProductName()}">3</td>
                 <td th:text="${orderOutputDTO.getStartPath()}">4</td>
@@ -40,11 +41,17 @@
                 <td th:text="${orderOutputDTO.getDataStartDate()}">8</td>
                 <td th:text="${orderOutputDTO.getDataEndDate()}">9</td>
                 <td th:text="${#dates.format(orderOutputDTO.getOrderSubmittedTime(), 'yyyy-MM-dd HH:mm:ss')}">10</td>
-                <td th:text="${orderOutputDTO.getOrderCompletedTime()}==null ? '正在处理':${#dates.format(orderOutputDTO.getOrderCompletedTime(), 'yyyy-MM-dd HH:mm:ss')}">11</td>
+                <td id="td-complete-time" th:text="${orderOutputDTO.getOrderCompletedTime()}==null ? '订单未完成':${#dates.format(orderOutputDTO.getOrderCompletedTime(), 'yyyy-MM-dd HH:mm:ss')}">11</td>
+                <th id="th-order-status">未开始</th>
                 <td>
                     <button href="#myModal" id="openBtn" data-toggle="modal"
                             class="btn btn-outline-primary">
                         订单数据详情
+                    </button>
+                </td>
+                <td>
+                    <button  id="excuteBtn" class="btn btn-default">
+                        开始订单
                     </button>
                 </td>
                 <td>
@@ -66,35 +73,37 @@
                 </div>
                 <div class="modal-body">
                     <h5 class="text-center">数据集详情</h5>
-                    <table class="table table-striped" id="tblGrid">
-                        <thead id="tblHead">
-                        <tr>
-                            <th>dataSensorName</th>
-                            <th>dataProductName</th>
-                            <th>identifier</th>
-                            <th>tileCode</th>
-                            <th>sceneDate</th>
-                            <th>formatCode</th>
-                            <th>dataSource</th>
-                            <th>dataGranuleUri</th>
-                            <th colspan="2">options</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:each="dataGranuleOutputDTO : ${dataGranuleOutputDTOs}">
-                                <td th:text="${dataGranuleOutputDTO.getDataSensorName}">PENDING</td>
-                                <td th:text="${dataGranuleOutputDTO.getDataProductName}">PENDING</td>
-                                <td th:text="${dataGranuleOutputDTO.getIdentifier}">PENDING</td>
-                                <td th:text="${dataGranuleOutputDTO.getTileCode}">PENDING</td>
-                                <td th:text="${dataGranuleOutputDTO.getSceneDate}">PENDING</td>
-                                <td th:text="${dataGranuleOutputDTO.getFormatCode}">PENDING</td>
-                                <td th:text="${dataGranuleOutputDTO.getDataSource}">PENDING</td>
-                                <td th:text="${dataGranuleOutputDTO.getDataGranuleUri}">PENDING</td>
-                                <td><button type="button" class="btn btn-primary">download</button></td>
-                                <td><button type="button" class="btn btn-primary">cancel</button></td>
+                    <div style="width:100%; height:500px; overflow:auto;">
+                        <table class="table table-striped" id="tblGrid">
+                            <thead id="tblHead">
+                            <tr>
+                                <th>dataSensorName</th>
+                                <th>dataProductName</th>
+                                <th>identifier</th>
+                                <th>tileCode</th>
+                                <th>sceneDate</th>
+                                <th>formatCode</th>
+                                <th>dataSource</th>
+                                <th>dataGranuleUri</th>
+                                <th colspan="2">options</th>
                             </tr>
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                <tr th:each="dataGranuleOutputDTO : ${dataGranuleOutputDTOs}">
+                                    <td th:text="${dataGranuleOutputDTO.getDataSensorName()}">PENDING</td>
+                                    <td th:text="${dataGranuleOutputDTO.getDataProductName()}">PENDING</td>
+                                    <td th:text="${dataGranuleOutputDTO.getIdentifier()}">PENDING</td>
+                                    <td th:text="${dataGranuleOutputDTO.getTileCode()}">PENDING</td>
+                                    <td th:text="${dataGranuleOutputDTO.getSceneDate()}">PENDING</td>
+                                    <td th:text="${dataGranuleOutputDTO.getFormatCode()}">PENDING</td>
+                                    <td th:text="${dataGranuleOutputDTO.getDataSource()}">PENDING</td>
+                                    <td th:text="${dataGranuleOutputDTO.getDataGranuleUri()}==null ? '正在处理': ${dataGranuleOutputDTO.getDataGranuleUri()}">PENDING</td>
+                                    <td><button type="button" class="btn btn-primary">download</button></td>
+                                    <td><button type="button" class="btn btn-primary">cancel</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
                 <!--分页-->
 

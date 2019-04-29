@@ -13,7 +13,9 @@ import java.util.List;
  */
 public interface ProcessService {
 
-    List<DataGranule> doSR(Integer orderId);
+    List<DataGranule> doSR( List<DataGranule> dataGranules);
 
-    List<DataGranule> doNDVI(Integer orderId);
+    List<DataGranule> doNDVI( List<DataGranule> dataGranules);
+
+    List<DataGranule> doNDWI( List<DataGranule> dataGranules);
 }

@@ -12,9 +12,13 @@ import lombok.extern.slf4j.Slf4j;
 @Getter
 @Slf4j
 public enum OrderStatusEnum {
+    /**
+     * code是数据库中存储的代码，message存储其表达的信息
+     */
     NEW(0, "新订单"),
-    FINISHED(1, "完结"),
-    CANCEL(2, "已取消"),
+    FINISHED(1, "订单已完成"),
+    CANCEL(2, "订单已取消"),
+    ERROR(3, "订单出错")
     ;
     private Integer code;
     private String message;

@@ -27,4 +27,5 @@ public class PathConfigs {
      */
     public String outputPath;
 
+    public String staticResourcePrefix;
 }

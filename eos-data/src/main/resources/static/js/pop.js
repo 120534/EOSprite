@@ -1,5 +1,4 @@
 //js for Modal components
-//detail弹窗
 $('#exampleModal').on('show.bs.modal', function (event) {
     var button = $(event.relatedTarget) // Button that triggered the modal
     var recipient = button.data('whatever') // Extract info from data-* attributes
@@ -10,9 +9,39 @@ $('#exampleModal').on('show.bs.modal', function (event) {
     modal.find('.modal-body input').val(recipient)
 });
 
-//请求Modal数据
-// $('#openBtn').click(function () {
-//
-// });
+//js for data process
+
+var orderId = document.getElementById('td-order-id').innerText;
+console.log('orderId = '+ orderId);
+$('#excuteBtn').click(function () {
+    $('#th-order-status').text('开始处理订单');
+    $("#excuteBtn").unbind();
+    $.ajax({
+        url: '/process',
+        data:{orderId : id},
+        dataType: 'json',
+        success:function (res) {
+            $('#td-complete-time').text(res.orderCompletedTime);
+            $('#th-order-statu').text(res.message);
+            alert(res.message);
+        }
+    })
+});
+
+
+// var getting = {
+//     url:'/data/status?orderId='+orderId,
+//     dataType:'json',
+//     success:function(res) {
+//         console.log(res);
+//         if(res.code === 200){
+//             console.log(res)
+//         }else{
+//             console.log('error');
+//         }
+//     }
+// };
+// //关键在这里，Ajax定时访问服务端，不断获取数据 ，这里是3秒请求一次。
+// window.setInterval(function(){$.ajax(getting)},3000);
 
 

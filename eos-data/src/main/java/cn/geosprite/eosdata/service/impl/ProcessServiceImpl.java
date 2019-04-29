@@ -2,25 +2,33 @@ package cn.geosprite.eosdata.service.impl;
 
 import cn.geosprite.eosdata.config.PathConfigs;
 import cn.geosprite.eosdata.dao.DataGranuleRepository;
+import cn.geosprite.eosdata.dao.OrdersRepository;
 import cn.geosprite.eosdata.dataGranuleUtils.DataGranules;
+import cn.geosprite.eosdata.dto.OrderStatus;
 import cn.geosprite.eosdata.entity.DataGranule;
-import cn.geosprite.eosdata.enums.FormatCode;
+import cn.geosprite.eosdata.entity.Orders;
+import cn.geosprite.eosdata.enums.LandsatFormatCode;
+import cn.geosprite.eosdata.enums.OrderEnum;
+import cn.geosprite.eosdata.enums.OrderStatusEnum;
 import cn.geosprite.eosdata.service.ProcessService;
 import cn.geosprite.eosprocess.service.LasrcService;
 import cn.geosprite.eosprocess.service.BandMathService;
 import lombok.extern.slf4j.Slf4j;
+import monocle.std.list;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
- * @ Author     ：wanghl
  * @ Date       ：Created in 21:14 2019-4-7
  * @ Description：None
  * @ Modified By：
+ * @author 17491
  */
 
 @Service
@@ -31,36 +39,39 @@ public class ProcessServiceImpl implements ProcessService {
     private BandMathService bandMathService;
     private LasrcService lasrcService;
     private DataGranuleRepository dataGranuleRepository;
-
+    private OrdersRepository ordersRepository;
+    private DataServiceImpl dataService;
     private PathConfigs pathConfigs;
 
 
     @Autowired
-    public ProcessServiceImpl(PreProcessServiceImpl preProcessService, LasrcService lasrcService, BandMathService bandMathService, DataGranuleRepository dataGranuleRepository, PathConfigs pathConfigs) {
+    public ProcessServiceImpl(PreProcessServiceImpl preProcessService, LasrcService lasrcService,
+                              BandMathService bandMathService, DataGranuleRepository dataGranuleRepository,
+                              PathConfigs pathConfigs, DataServiceImpl dataService,
+                              OrdersRepository ordersRepository) {
         this.preProcessService = preProcessService;
         this.lasrcService = lasrcService;
         this.bandMathService = bandMathService;
         this.dataGranuleRepository = dataGranuleRepository;
         this.pathConfigs = pathConfigs;
+        this.dataService = dataService;
+        this.ordersRepository = ordersRepository;
     }
 
     @Override
-    public List<DataGranule> doSR(Integer orderId) {
+    public List<DataGranule> doSR(List<DataGranule> dataGranules) {
 
         //返回已经做过大气校正的dataGranule信息
         List<DataGranule> result = new ArrayList<>();
-
-        List<DataGranule> dataGranules = dataGranuleRepository.findDataGranulesByOrderDataGranuleId(orderId);
-
         //确保所有数据都在本地且已经解压
         List<DataGranule> dirDataGranule = preProcessService.extractFiles(dataGranules);
 
         for (DataGranule dataGranule: dirDataGranule){
-            DataGranule outputDataGranule = DataGranules.converter(dataGranule, FormatCode.SR);
+            DataGranule outputDataGranule = DataGranules.converter(dataGranule, LandsatFormatCode.SR);
 
             //如果是解压后的原始数据，则需要进行大气校正
-            if (dataGranule.getProductCode().equalsIgnoreCase(FormatCode.DIR.getProductCode()) &&
-                    dataGranule.getFormatCode().equalsIgnoreCase(FormatCode.DIR.getFormat())){
+            if (dataGranule.getProductCode().equalsIgnoreCase(LandsatFormatCode.DIR.getProductCode()) &&
+                    dataGranule.getFormatCode().equalsIgnoreCase(LandsatFormatCode.DIR.getFormat())){
 
                 //大气校正的输入路径
                 String inputPath = pathConfigs.inputPath + dataGranule.getDataGranulePath();
@@ -78,24 +89,20 @@ public class ProcessServiceImpl implements ProcessService {
     }
 
     @Override
-    public List<DataGranule> doNDVI(Integer orderId) {
-
+    public List<DataGranule> doNDVI( List<DataGranule> dataGranules) {
         /**
          *先要判断是否计算过Ndvi，然后在对其进行下一步操作。
          * 但是这里判断是否做过nvdi，逻辑应该放在doNdvi代码前。
-         *
          */
         List<DataGranule> result = new ArrayList<>();
-
         //确保数据都做过大气校正
-        List<DataGranule> list = doSR(orderId);
-
+        List<DataGranule> list = doSR(dataGranules);
         for (DataGranule dataGranule: list) {
-            DataGranule ndviPng = DataGranules.converter(dataGranule, FormatCode.NDVI_PNG);
-            DataGranule ndviTiff = DataGranules.converter(dataGranule, FormatCode.NDVI_TIFF);
+            DataGranule ndviPng = DataGranules.converter(dataGranule, LandsatFormatCode.NDVI_PNG);
+            DataGranule ndviTiff = DataGranules.converter(dataGranule, LandsatFormatCode.NDVI_TIFF);
 
-            if (dataGranule.getProductCode().equalsIgnoreCase(FormatCode.SR.getProductCode()) &&
-                    dataGranule.getFormatCode().equalsIgnoreCase(FormatCode.SR.getFormat())){
+            if (dataGranule.getProductCode().equalsIgnoreCase(LandsatFormatCode.SR.getProductCode()) &&
+                    dataGranule.getFormatCode().equalsIgnoreCase(LandsatFormatCode.SR.getFormat())){
                 String inputPath = pathConfigs.inputPath + dataGranule.getDataGranulePath();
                 String pngPath = pathConfigs.inputPath + ndviPng.getDataGranulePath();
                 String tiffPath = pathConfigs.inputPath + ndviTiff.getDataGranulePath();
@@ -103,50 +110,120 @@ public class ProcessServiceImpl implements ProcessService {
                 log.info("start calculating ndvi for {}", dataGranule.toString());
                 //这里有点问题，getNdvi应该处理多幅影像
 
-                List<Integer> bandNums = Arrays.asList(4,5);
-
                 bandMathService.doNDVI(inputPath, pngPath, tiffPath);
                 log.info("ndvi calculation has ended");
-//                dataGranule = Utils.convertDataGranule(dataGranule,FormatCode.NDVI);
-//                dataService.save(dataGranule);
-                dataGranuleRepository.save(ndviPng);
-                dataGranuleRepository.save(ndviTiff);
-                result.add(ndviPng);
-                result.add(ndviTiff);
+
+                String tiffUri = pathConfigs.staticResourcePrefix + ndviTiff.getDataGranulePath();
+                String pngPreviewUri = pathConfigs.staticResourcePrefix + ndviPng.getDataGranulePath();
+                dataGranuleRepository.updateDataGranuleURIAndPreview(ndviTiff.getDataGranuleId(),tiffUri,pngPreviewUri);
+
+                result.add(dataGranuleRepository.findDataGranuleByDataGranuleId(ndviTiff.getDataGranuleId()));
             }
                 result.add(dataGranule);
         }
         return result;
     }
 
-    public List<DataGranule> doNWVI(Integer orderId){
+    @Override
+    public List<DataGranule> doNDWI(List<DataGranule> dataGranules){
         List<DataGranule> result = new ArrayList<>();
 
         //确保数据都做过大气校正
-        List<DataGranule> list = doSR(orderId);
+        List<DataGranule> list = doSR(dataGranules);
 
         for (DataGranule dataGranule: list) {
-            DataGranule ndwiPng = DataGranules.converter(dataGranule, FormatCode.NDWI_PNG);
-            DataGranule ndwiTiff = DataGranules.converter(dataGranule, FormatCode.NDWI_TIFF);
+            DataGranule ndwiPng = DataGranules.converter(dataGranule, LandsatFormatCode.NDWI_PNG);
+            DataGranule ndwiTiff = DataGranules.converter(dataGranule, LandsatFormatCode.NDWI_TIFF);
 
-            if (dataGranule.getProductCode().equalsIgnoreCase(FormatCode.SR.getProductCode()) &&
-                    dataGranule.getFormatCode().equalsIgnoreCase(FormatCode.SR.getFormat())){
+            if (dataGranule.getProductCode().equalsIgnoreCase(LandsatFormatCode.SR.getProductCode()) &&
+                    dataGranule.getFormatCode().equalsIgnoreCase(LandsatFormatCode.SR.getFormat())){
                 String inputPath = pathConfigs.inputPath + dataGranule.getDataGranulePath();
                 String pngPath = pathConfigs.inputPath + ndwiPng.getDataGranulePath();
                 String tiffPath = pathConfigs.inputPath + ndwiTiff.getDataGranulePath();
 
-                //这里有点问题，getNdvi应该处理多幅影像
+                //getNdvi应该设置处理多幅影像
                 bandMathService.doNDWI(inputPath, pngPath, tiffPath);
-//                dataGranule = Utils.convertDataGranule(dataGranule,FormatCode.NDVI);
-//                dataService.save(dataGranule);
-                dataGranuleRepository.save(ndwiPng);
-                dataGranuleRepository.save(ndwiTiff);
-                result.add(ndwiPng);
-                result.add(ndwiTiff);
+
+                /**
+                 *这里的PNG不在单独存储到dataGranule表中了，处理完后，更新dataGranulePreview，直接给定链接。
+                 * http://192.168.14.212/LC08/L1TP_C1_T1_NDVI/PNG/113/026/2018/12/30/LC81130262018364LGN00.PNG
+                 * LC08/L1TP_C1_T1_NDVI/TIFF/126/034/2019/03/15/LC81260342019074LGN00_NDVI.tiff
+                 */
+
+                String tiffUri = pathConfigs.staticResourcePrefix + ndwiTiff.getDataGranulePath();
+                String pngPreviewUri = pathConfigs.staticResourcePrefix + ndwiPng.getDataGranulePath();
+                dataGranuleRepository.updateDataGranuleURIAndPreview(ndwiTiff.getDataGranuleId(),tiffUri,pngPreviewUri);
+
+                result.add(dataGranuleRepository.findDataGranuleByDataGranuleId(ndwiTiff.getDataGranuleId()));
             }
             result.add(dataGranule);
         }
         return result;
     }
 
+    /**
+     * 前端发送orderId信息
+     * 1.接收orderId开始处理数据，
+     * 2.数据处理后，更新uri信息
+     * 3.处理完后修改订单的order_complete_time，以及orderStatus
+     * 4.再把数据信息返回到前端
+     */
+    public OrderStatus process(Integer orderId){
+        /**查询得到订单的ID*/
+        Orders orders = ordersRepository.findByOrderId(orderId);
+        /**获取到productName，判断需要什么数据处理方法*/
+        String productName = orders.getDataProductName();
+        /**根据orderId查询到订单包含的DataGranule（注意：这里的dataGranule是提前写入数据库的，还没真正处理过）*/
+        List<DataGranule> dataGranules = dataService.findDataGranulesByOrderId(orderId);
+
+        /**创建两个集合，如果数据库已经由处理过的数据时，放入product中，就不用处理了，否则放入raw，进行数据处理*/
+        List<DataGranule> product = new ArrayList<>();
+        List<DataGranule> raw = new ArrayList<>();
+
+        /**遍历订单里面所有的dataGranule，依据URI是否为空，分别分入两个集合*/
+        for (DataGranule dataGranule: dataGranules){
+            if (dataGranule.getDataGranuleUri() == null){
+                raw.add(DataGranules.converterBack(dataGranule, LandsatFormatCode.TGZ));
+            }else {
+                product.add(dataGranule);
+            }
+        }
+
+        /**创建一个集合，接受处理后的数据*/
+        List<DataGranule> list;
+        //根据productName进行判断，调用哪个方法处理数据
+        if (productName.equalsIgnoreCase(LandsatFormatCode.NDVI_TIFF.getProductCode())){
+            list = doNDVI(raw);
+        }else if (productName.equalsIgnoreCase(LandsatFormatCode.NDWI_TIFF.getProductCode())){
+            list = doNDWI(raw);
+        }else {
+            throw new RuntimeException("no method existing for " + productName);
+        }
+        /**把处理后的dataGranule信息并入product集合中，这个集合包含了全部处理过的数据信息*/
+        list.addAll(product);
+
+        /**异常处理，后期再修改把，这里只是判断了URI是否为空，将其分为处理遇到异常，或者处理完成*/
+        List<DataGranule>  list3 = list.stream().filter(x -> x.getDataGranuleUri()!= null).collect(Collectors.toList());
+
+        List<DataGranule>  list4 = list.stream().filter(x -> x.getDataGranuleUri() == null).collect(Collectors.toList());
+
+        /**添加时间戳到Order表中，同时返回到前端*/
+        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+
+        /**更新订单信息，加入订单完成时间和订单状态*/
+        ordersRepository.updateOrderFinish(orderId,timestamp, OrderStatusEnum.FINISHED.getCode());
+
+        OrderStatus orderStatus ;
+        if (list4.size()==0){
+            orderStatus = new OrderStatus()
+                    .setMessage(OrderStatusEnum.FINISHED.getMessage())
+                    .setOrderCompletedTime(timestamp);
+        }else {
+            orderStatus = new OrderStatus()
+                    .setMessage(OrderStatusEnum.CANCEL.getMessage())
+                    .setDataGranuleList(list3)
+                    .setOrderCompletedTime(timestamp);
+        }
+        return orderStatus;
+    }
 }

@@ -3,19 +3,16 @@ package cn.geosprite.eosdata.controller;
 import cn.geosprite.eosdata.dto.DataGranuleOutputDTO;
 import cn.geosprite.eosdata.dto.OrderInputDTO;
 import cn.geosprite.eosdata.dto.OrderOutputDTO;
-import cn.geosprite.eosdata.entity.OrderDataGranule;
-import cn.geosprite.eosdata.entity.Orders;
 import cn.geosprite.eosdata.service.impl.DataServiceImpl;
-import org.geolatte.geom.M;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
+
+import java.util.List;
 
 /**
  * @ Author     ：wanghl
@@ -51,54 +48,20 @@ public class DataController {
      * 再进行查询，符合order要求的dataGranule
      * 测试数据
      * LC08/L1TP_C1_T1_NDVI/TIFF/117/043/2018/03/29	LC08	L1TP_C1_T1_NDVI	117/043	2018-03-29	TIFF	USGS	LC08/L1TP_C1_T1_NDVI/TIFF/117/043/2018/03/29/LC81170432018088LGN00.TIFF
-     * @param oderInputDTO
-     * @return
-     */
-    @RequestMapping(value = "", method=RequestMethod.POST)
-    @ResponseBody
-    public Page<OrderDataGranule> postOrder(OrderInputDTO oderInputDTO,
-                                            @RequestParam(defaultValue = "1" ) Integer page,
-                                            @RequestParam(defaultValue = "5" ) Integer size)
-    {
-        PageRequest pageRequest = PageRequest.of(page - 1, size);
-        Page<OrderDataGranule> pages = dataService.findByOrder(oderInputDTO, pageRequest);
-        return dataService.findByOrder(oderInputDTO, pageRequest);
-    }
-
-    /**
-     * index界面提交order订单后，返回orders信息到前台。
+     * index界面提交order订单后，返回orders信息到前，等前台确认下单。
      */
     @RequestMapping(value = "/postOrder", method=RequestMethod.POST)
-    public ModelAndView saveOrderAndReturnOrder(OrderInputDTO oderInputDTO,
-                                                @RequestParam(defaultValue = "1" ) Integer page,
-                                                @RequestParam(defaultValue = "5" ) Integer size)
+    public ModelAndView saveOrderFormReturnOrder(OrderInputDTO oderInputDTO)
     {
         ModelAndView  modelAndView = new ModelAndView("orders.html");
-        OrderOutputDTO orderOutputDTO = dataService.orderReply(oderInputDTO);
-        Integer orderId = orderOutputDTO.getOrderId();
-        /** 把分页信息返回给页面 */
-        PageRequest pageRequest = PageRequest.of(page - 1, size);
-        Page<DataGranuleOutputDTO> dataGranuleOutputDTOs =
-                dataService.findDataGranuleOutputDTOByOrderId(orderId, pageRequest);
-
+        /**返回订单信息给用户*/
+        OrderOutputDTO orderOutputDTO = dataService.orderInfoReply(oderInputDTO);
         modelAndView.addObject("orderOutputDTO",orderOutputDTO);
-        modelAndView.addObject("dataGranuleOutputDTOs", dataGranuleOutputDTOs);
 
+        /** 返回modal中的订单详细信息给用户 */
+        List<DataGranuleOutputDTO> dataGranuleOutputDTOs =
+                dataService.orderDetailInfoReply(orderOutputDTO);
+        modelAndView.addObject("dataGranuleOutputDTOs", dataGranuleOutputDTOs);
         return modelAndView;
     }
-
-    @RequestMapping(value = "/postOrder/orderDetail", method=RequestMethod.GET)
-    @ResponseBody
-    public Page<DataGranuleOutputDTO> orderDetail(@RequestParam Integer orderId,
-                                            @RequestParam(defaultValue = "1" ) Integer page,
-                                            @RequestParam(defaultValue = "5" ) Integer size) {
-
-        PageRequest pageRequest = PageRequest.of(page, size);
-
-        Page<DataGranuleOutputDTO> dataGranuleOutputDTOs =
-                dataService.findDataGranuleOutputDTOByOrderId(orderId, pageRequest);
-
-        return dataGranuleOutputDTOs;
-    }
-
 }

@@ -1,25 +1,16 @@
 package cn.geosprite.eosdata.dto;
-import cats.kernel.Order;
 import cn.geosprite.eosdata.entity.Orders;
-import cn.geosprite.eosdata.enums.DataEnum;
 import cn.geosprite.eosdata.enums.LandsatEnum;
-import cn.geosprite.eosdata.enums.OrderEnum;
 import cn.geosprite.eosdata.enums.OrderStatusEnum;
-import cn.geosprite.eosdata.utils.EnumUtil;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.sun.xml.internal.bind.v2.TODO;
 import lombok.Data;
 import lombok.experimental.Accessors;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.springframework.beans.BeanUtils;
-import org.springframework.context.annotation.Bean;
 
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 
 /**
  * @ Author     ：wanghl

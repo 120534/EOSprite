@@ -1,14 +1,19 @@
 package cn.geosprite.eosdata.controller;
 
+import cn.geosprite.eosdata.dto.OrderStatus;
 import cn.geosprite.eosdata.entity.DataGranule;
+import cn.geosprite.eosdata.entity.Orders;
 import cn.geosprite.eosdata.service.impl.DataServiceImpl;
 import cn.geosprite.eosdata.service.impl.ProcessServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.sql.Timestamp;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @ Author     ：wanghl
@@ -21,32 +26,31 @@ import java.util.List;
 public class ProcessController {
 
     private ProcessServiceImpl processService;
+    private DataServiceImpl dataService;
 
     @Autowired
     public ProcessController(ProcessServiceImpl processService) {
         this.processService = processService;
     }
 
-    @GetMapping("/lasrc")
-    public DataGranule lasrc(@RequestParam Integer orderId){
-        List<DataGranule> unzippedDataGranule = processService.doSR(orderId);
+    @GetMapping("/process")
+    @ResponseBody
+    public OrderStatus process(@RequestParam Integer orderId){
+        /**
+         * 前端发送orderId信息,处理数据，返回处理后的订单状态
+         */
+     return processService.process(orderId);
 
-        return unzippedDataGranule.get(0);
-    }
-
-    @GetMapping("/ndvi")
-    public DataGranule ndvi(@RequestParam Integer orderId){
-        List<DataGranule> unzippedDataGranule = processService.doNDVI(orderId);
-
-        return unzippedDataGranule.get(0);
-    }
-
-    @GetMapping("/ndwi")
-    public DataGranule ndwi(@RequestParam Integer orderId){
-        List<DataGranule> unzippedDataGranule = processService.doNWVI(orderId);
-
-        return unzippedDataGranule.get(0);
     }
 
 
+    @GetMapping("/test")
+    @ResponseBody
+    private OrderStatus test(@RequestParam Integer orderId){
+
+        return  new OrderStatus()
+                .setMessage("处理完成")
+                .setOrderCompletedTime(new Timestamp(System.currentTimeMillis()));
+
+    }
 }
