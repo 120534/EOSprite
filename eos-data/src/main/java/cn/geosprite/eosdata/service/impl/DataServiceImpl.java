@@ -144,26 +144,31 @@ public class DataServiceImpl implements DataService {
          */
         List<DataGranule> productDataGranule = findProductDataByOrder(orders1);
         /**
-         * 对没有符合条件的数据产品dataGranule进行提前生成数据产品信息入库，
+         * 对没有符合条件的数据产品dataGranule进行提前生成数据产品信息入库,要去除那部分已经生成的product，
          * 确保OrderDataGranule表已经写入信息，可以返回给前端。
          */
         List<DataGranule> rawDataGranule = findRawDataByOrder(orders1);
 
-        /**使用两给List是为了后面，对converted进行remove，如果再添加product进去，数据的顺序会出问题。*/
-        List<DataGranule> result = new ArrayList<>();
+        /**使用两给List是为了后面处理，对converted进行remove，预先把数据结果放入datagranule表中，
+         * 防止部分数据已经存储，对其进行更新。
+         * result可以直接返回DataGranule给前端。
+         * */
         List<DataGranule> converted = new ArrayList<>();
         /**应该返回的dataGranule产品信息*/
         for (DataGranule dataGranule :rawDataGranule){
-            result.add(DataGranules.converterForward(dataGranule, LandsatFormatCode.fromProductCode(productName)));
             converted.add(DataGranules.converterForward(dataGranule, LandsatFormatCode.fromProductCode(productName)));
         }
         /**把新的dataGranule产品信息入库，需要先出去掉已经有的产品信息，防止重复插入数据*/
-        if (!productDataGranule.isEmpty()){
-            converted.removeAll(productDataGranule);
+        if (productDataGranule.size() != 0){
+            //不能直接移除，product里面的dataGranule于converted里面的不一样,去除ID信息
+            List<String> dataGranule2 = productDataGranule.stream().map(DataGranule::getDataGranuleId).collect(Collectors.toList());
+            /**如果id被包含在product里面，那么过滤掉*/
+            converted = converted.stream().filter(x -> !dataGranule2.contains(x.getDataGranuleId())).collect(Collectors.toList());
         }
         /**查询orderDataGranule，写入到OrderDataGranule表中*/
         dataGranuleRepository.saveAll(converted);
 
+        List<DataGranule> result = findProductDataByOrder(orders1);
         List<OrderDataGranule> orderDataGranules = result
                 .stream()
                 .map(x -> new OrderDataGranule().setOrderId(orderId).setDataGranule(x)).collect(Collectors.toList());

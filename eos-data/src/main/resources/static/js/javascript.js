@@ -7,8 +7,10 @@ $(function() {
 });
 
 $('.tab-nav li').click(function(){
+    $('.tab-nav li').removeClass('path-row');
+    $(this).addClass('path-row');
     $('.tab-content').css('display','none');
-    $('.tab-content').eq($(this).order()).css('display','block')
+    $('.tab-content').eq($(this).index()).css('display','block')
 });
 
 var map = L.map('map',{zoomControl: false}).setView([35, 110], 4);

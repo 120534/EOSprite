@@ -44,13 +44,13 @@
                 <td id="td-complete-time" th:text="${orderOutputDTO.getOrderCompletedTime()}==null ? '订单未完成':${#dates.format(orderOutputDTO.getOrderCompletedTime(), 'yyyy-MM-dd HH:mm:ss')}">11</td>
                 <th id="th-order-status">未开始</th>
                 <td>
-                    <button href="#myModal" id="openBtn" data-toggle="modal"
-                            class="btn btn-outline-primary">
+                    <button id="order-detail-btn" href="#myModal" data-toggle="modal"
+                            class="btn btn-outline-primary" onclick="transfer(); this.onclick=null;">
                         订单数据详情
                     </button>
                 </td>
                 <td>
-                    <button  id="excuteBtn" class="btn btn-default">
+                    <button  id="excuteBtn" class="btn btn-default" >
                         开始订单
                     </button>
                 </td>
@@ -84,7 +84,6 @@
                                 <th>sceneDate</th>
                                 <th>formatCode</th>
                                 <th>dataSource</th>
-                                <th>dataGranuleUri</th>
                                 <th colspan="2">options</th>
                             </tr>
                             </thead>
@@ -97,19 +96,18 @@
                                     <td th:text="${dataGranuleOutputDTO.getSceneDate()}">PENDING</td>
                                     <td th:text="${dataGranuleOutputDTO.getFormatCode()}">PENDING</td>
                                     <td th:text="${dataGranuleOutputDTO.getDataSource()}">PENDING</td>
-                                    <td th:text="${dataGranuleOutputDTO.getDataGranuleUri()}==null ? '正在处理': ${dataGranuleOutputDTO.getDataGranuleUri()}">PENDING</td>
-                                    <td><button type="button" class="btn btn-primary">download</button></td>
-                                    <td><button type="button" class="btn btn-primary">cancel</button></td>
+                                    <td><a th:id="${dataGranuleOutputDTO.getDataGranuleId()}+'-preview'" target="view_window">preview</a></td>
+                                    <td><a th:id="${dataGranuleOutputDTO.getDataGranuleId()}+'-url'">download</a></td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
-                <!--分页-->
 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default " data-dismiss="modal">Close</button>
                 </div>
+
             </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->

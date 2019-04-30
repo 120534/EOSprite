@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import monocle.std.list;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import spire.algebra.Bool;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -180,7 +181,12 @@ public class ProcessServiceImpl implements ProcessService {
         List<DataGranule> product = new ArrayList<>();
         List<DataGranule> raw = new ArrayList<>();
 
+        /**判断dataGranule是否已经全部处理过(条件是URL都不为空)，那么就可以直接返回*/
+        long a = 0;
+        long b = dataGranules.stream().filter(x -> x.getDataGranuleUri()==null && x.getDataGranulePreview()==null).count();
+
         /**遍历订单里面所有的dataGranule，依据URI是否为空，分别分入两个集合*/
+
         for (DataGranule dataGranule: dataGranules){
             if (dataGranule.getDataGranuleUri() == null){
                 raw.add(DataGranules.converterBack(dataGranule, LandsatFormatCode.TGZ));
@@ -189,41 +195,54 @@ public class ProcessServiceImpl implements ProcessService {
             }
         }
 
-        /**创建一个集合，接受处理后的数据*/
-        List<DataGranule> list;
-        //根据productName进行判断，调用哪个方法处理数据
-        if (productName.equalsIgnoreCase(LandsatFormatCode.NDVI_TIFF.getProductCode())){
-            list = doNDVI(raw);
-        }else if (productName.equalsIgnoreCase(LandsatFormatCode.NDWI_TIFF.getProductCode())){
-            list = doNDWI(raw);
+        /**如果都处理过则不用进行处理，直接返回结果*/
+        if (raw.size() != 0){
+            /**创建一个集合，接受处理后的数据*/
+            List<DataGranule> list;
+            //根据productName进行判断，调用哪个方法处理数据
+            if (productName.equalsIgnoreCase(LandsatFormatCode.NDVI_TIFF.getProductCode())){
+                list = doNDVI(raw);
+            }else if (productName.equalsIgnoreCase(LandsatFormatCode.NDWI_TIFF.getProductCode())){
+                list = doNDWI(raw);
+            }else {
+                throw new RuntimeException("no method existing for " + productName);
+            }
+            /**把处理后的dataGranule信息并入product集合中，这个集合包含了全部处理过的数据信息*/
+            list.addAll(product);
+
+            /**异常处理，后期再修改把，这里只是判断了URI是否为空，将其分为处理遇到异常，或者处理完成*/
+
+            /**list3包含处理失败的数据*/
+            List<DataGranule>  list3 = list.stream().filter(x -> x.getDataGranuleUri() == null).collect(Collectors.toList());
+
+            /**list4包含处理成功的数据*/
+            List<DataGranule>  list4 = list.stream().filter(x -> x.getDataGranuleUri()!= null).collect(Collectors.toList());
+
+            /**添加时间戳到Order表中，同时返回到前端*/
+            Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+
+            /**更新订单信息，加入订单完成时间和订单状态*/
+            ordersRepository.updateOrderFinish(orderId,timestamp, OrderStatusEnum.FINISHED.getCode());
+
+            OrderStatus orderStatus ;
+            if (list4.size()==0){
+                orderStatus = new OrderStatus()
+                        .setMessage(OrderStatusEnum.FINISHED.getMessage())
+                        .setOrderCompletedTime(timestamp);
+            }else {
+                orderStatus = new OrderStatus()
+                        .setMessage(OrderStatusEnum.CANCEL.getMessage())
+                        .setDataGranuleList(list3)
+                        .setOrderCompletedTime(timestamp);
+            }
+            return orderStatus;
         }else {
-            throw new RuntimeException("no method existing for " + productName);
+            Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+
+            /**更新订单信息，加入订单完成时间和订单状态*/
+            ordersRepository.updateOrderFinish(orderId,timestamp, OrderStatusEnum.FINISHED.getCode());
+            return new OrderStatus().setOrderCompletedTime(timestamp)
+                    .setMessage(OrderStatusEnum.FINISHED.getMessage());
         }
-        /**把处理后的dataGranule信息并入product集合中，这个集合包含了全部处理过的数据信息*/
-        list.addAll(product);
-
-        /**异常处理，后期再修改把，这里只是判断了URI是否为空，将其分为处理遇到异常，或者处理完成*/
-        List<DataGranule>  list3 = list.stream().filter(x -> x.getDataGranuleUri()!= null).collect(Collectors.toList());
-
-        List<DataGranule>  list4 = list.stream().filter(x -> x.getDataGranuleUri() == null).collect(Collectors.toList());
-
-        /**添加时间戳到Order表中，同时返回到前端*/
-        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-
-        /**更新订单信息，加入订单完成时间和订单状态*/
-        ordersRepository.updateOrderFinish(orderId,timestamp, OrderStatusEnum.FINISHED.getCode());
-
-        OrderStatus orderStatus ;
-        if (list4.size()==0){
-            orderStatus = new OrderStatus()
-                    .setMessage(OrderStatusEnum.FINISHED.getMessage())
-                    .setOrderCompletedTime(timestamp);
-        }else {
-            orderStatus = new OrderStatus()
-                    .setMessage(OrderStatusEnum.CANCEL.getMessage())
-                    .setDataGranuleList(list3)
-                    .setOrderCompletedTime(timestamp);
-        }
-        return orderStatus;
     }
 }

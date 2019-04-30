@@ -26,6 +26,8 @@ public class DataGranuleOutputDTO {
     /**
      * Landsat-8,MODIS, Sentinel-2 ,etc.
      */
+    private String dataGranuleId;
+
     private String dataSensorName;
     /**
      * the name of product , like 归一化植被指数

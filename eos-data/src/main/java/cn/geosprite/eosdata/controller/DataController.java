@@ -1,9 +1,9 @@
 package cn.geosprite.eosdata.controller;
 
-import cn.geosprite.eosdata.dto.DataGranuleOutputDTO;
-import cn.geosprite.eosdata.dto.OrderInputDTO;
-import cn.geosprite.eosdata.dto.OrderOutputDTO;
+import cn.geosprite.eosdata.dto.*;
+import cn.geosprite.eosdata.enums.OrderStatusEnum;
 import cn.geosprite.eosdata.service.impl.DataServiceImpl;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -12,6 +12,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.sql.Timestamp;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -22,6 +24,7 @@ import java.util.List;
  */
 @Controller
 @RequestMapping("/data")
+@Slf4j
 public class DataController {
 
     private final DataServiceImpl dataService;
@@ -63,5 +66,13 @@ public class DataController {
                 dataService.orderDetailInfoReply(orderOutputDTO);
         modelAndView.addObject("dataGranuleOutputDTOs", dataGranuleOutputDTOs);
         return modelAndView;
+    }
+
+    @RequestMapping(value = "/polling", method = RequestMethod.GET)
+    @ResponseBody
+    public List<DataGranuleOutputDTO> polling(@RequestParam Integer orderId )
+    {
+        log.info("polling dataId with {}",orderId);
+        return dataService.findDataGranuleOutputDTOByOrderId(orderId);
     }
 }
