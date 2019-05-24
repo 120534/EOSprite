@@ -5,7 +5,6 @@
     <title>Order</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.1.0/dist/leaflet.css" integrity="sha512-wcw6ts8Anuw10Mzh9Ytw4pylW8+NAD4ch3lqm9lzAsTxg0GFeJgoAtxuCLREZSC5lUXdVyo/7yfsqFjQ4S+aKw==" crossorigin="" />
     <script src="https://unpkg.com/leaflet@1.1.0/dist/leaflet.js" integrity="sha512-mNqn2Wg7tSToJhvHcqfzLMU6J4mkOImSPTxVZAdo+lcPlk+GhZmYgACEe0x35K7YzW1zJ7XyJV/TT1MrdXvMcA==" crossorigin=""></script>
-
     <!--time picker-->
     <script  src="js/jquery-3.3.1.min.js" ></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
@@ -23,18 +22,43 @@
 <body>
 <body>
 <div style="position: relative">
+    <div class="navbar">
+        <nav class="navbar navbar-expand-md navbar-light bg-light">
+            <a href="#" class="navbar-brand">
+                <img src="image/platform_logo.jpg" height="79" alt="CoolBrand">
+            </a>
+            <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarCollapse">
+                <div class="navbar-nav">
+                    <a href="#" class="nav-item nav-link active">主页</a>
+                    <a href="#" class="nav-item nav-link">反馈</a>
+                    <a href="#" class="nav-item nav-link">消息</a>
+                </div>
+                <div class="navbar-nav ml-auto">
+                    <a href="#" class="nav-item nav-link">登陆</a>
+                    <a href="#" class="nav-item nav-link">退出</a>
+                </div>
+            </div>
+        </nav>
+    </div>
+
     <div id="map"></div>
     <div id="form-table">
         <div class="main-title">
-            <ul class="tab-nav">
-                <li class="path-row"><a href="#">行列号选择</a></li>
-                <li class="lat-lon"><a href="#">经纬度选择</a></li>
-                <li class="geo-file"><a href="#">矢量文件选择</a></li>
-            </ul>
+            <nav>
+                <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                    <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true">行列号选择</a>
+                    <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-profile" role="tab" aria-controls="nav-profile" aria-selected="false">矢量文件选择</a>
+                    <a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-contact" role="tab" aria-controls="nav-contact" aria-selected="false">经纬度选择</a>
+                </div>
+            </nav>
             <div class="tab-content">
                 <form method="post" action="/data/postOrder">
                     <div class="vis-selector">
-                        <label>选择数据集</label>
+                        <label>遥感数据集</label>
                         <select id="select-dataSet" name="dataSensorName">
                             <option selected disabled>请选择</option>
                             <option>Landsat-8</option>
@@ -43,12 +67,12 @@
                         </select>
                     </div>
                     <div class="vis-selector">
-                        <label>选择数据产品</label>
+                        <label>遥感模型</label>
                         <select id="select-product" name="dataProductName">
                             <option selected disabled>请选择</option>
                             <option>归一化植被指数(NDVI)</option>
                             <option>归一化水体指数(NDWI)</option>
-                            <option>地表反射率产品(SR)</option>
+                            <option>地表反射率(SR)</option>
                         </select>
                     </div>
                     <div>
@@ -64,9 +88,9 @@
                         <input class="tile-text" type="text" name="endRow" id="endRow" />
                     </div>
                     <div>
-                        <label for="daterange">date:&nbsp;</label><input type="text" id = "daterange" value="01/01/2018 - 01/15/2018" name="date"/>
+                        <label for="daterange">时间:&nbsp;</label><input type="text" id = "daterange" value="01/01/2018 - 01/15/2018" name="date"/>
                     </div>
-                    <p><input id="btn-1" type="submit" value="Submit" /> <input type="reset" value="Reset" /></p>
+                    <p><input id="btn-1" class="btn-primary" type="submit" value="提交" />&nbsp;&nbsp;<input class="btn-primary" type="reset" value="重置" /></p>
                 </form>
             </div>
             <div class="tab-content" style="display:none">
@@ -81,6 +105,9 @@
 </body>
 <script src="js/javascript.js" ></script>
 <link rel="stylesheet" type="text/css" href="css/style.css"/>
-<link href="vendor/bootstrap-3.3.7-dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 </body>
 </html>

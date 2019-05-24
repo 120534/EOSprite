@@ -1,16 +1,19 @@
 #form-table {
     position: absolute;
-    left:80px;
-    top:80px;
+    left:0;
+    top:105px;
     z-index: 2;
-    background: antiquewhite;
+    background: #fdffff;
 }
 .main-title{
-    width:300px;
-    height:200px;
+    position: relative;
+    left: 20px;
+    width:500px;
+    height:245px;
     margin-left: 0;
 }
 .tab-nav{
+    left: 30px;
     margin:0;
     height:30px;
     padding:0;
@@ -29,6 +32,8 @@
     background: #effffa;
 }
 .tab-content{
+    position: absolute;
+    left: 50px;
     height:150px;
     width:300px;
     margin-top:10px;
@@ -42,4 +47,11 @@
         width: 90%;
         max-width:1200px;
     }
+}
+#logo{
+    position: relative;
+    left: 2%;
+}
+#home{
+
 }
