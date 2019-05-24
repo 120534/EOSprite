@@ -1,10 +1,11 @@
-##程序说明
-####程序准备  
+## 程序说明
+#### 程序准备  
 1. 下载源码 `git clone http://159.226.110.179/wanghl/EOSprite.git`   
-2. 打包程序，进入主目录，EOSprite目录下 `mvn clean package -Dmaven.test.skip=true`跳过test目录源码编译和测试     
-3. 进入EOSprite/eos-data/target目录 `java -jar eos-data-0.0.1-SNAPSHOT.jar` 启动项目
+2. 打包程序，进入主目录，EOSprite目录下 `mvn clean package -Dmaven.test.skip=true` 跳过test目录源码编译和测试
+3. 启动nginx服务 `sudo systemctl start nginx` 
+4. 进入EOSprite/eos-data/target目录 `java -jar eos-data-0.0.1-SNAPSHOT.jar` 启动项目
 
-####启动程序
+#### 启动程序
 1. 程序入口`http://192.168.14.212:8787`
 ![image](order-page.png)
 
