@@ -76,12 +76,26 @@ public class ProcessServiceImpl implements ProcessService {
 
                 //大气校正的输入路径
                 String inputPath = pathConfigs.inputPath + dataGranule.getDataGranulePath();
+
+                /**
+                 *
+                 * /mnt/disk1/geodata/LC08/L1TP_C1_T1_SR/TIFF/113/026/2018/12/30/LC81130262018364LGN00
+                 * */
                 String outputPath = pathConfigs.outputPath + outputDataGranule.getDataGranulePath();
 
                 //进行大气校正
-                String log_  = lasrcService.doLasrc(inputPath, outputPath);
-                log.info("atmosphere correction is done,{}", log_);
-                dataGranuleRepository.save(outputDataGranule);
+                String logs  = lasrcService.doLasrc(inputPath, outputPath);
+                log.info("atmosphere correction is done,{}", logs);
+
+                /**
+                 *
+                 * http://192.168.14.212/LC08/L1TP_C1_T1_NDVI/PNG/113/026/2018/12/30/LC81130262018364LGN00.PNG
+                 * LC08/L1TP_C1_T1_NDVI/TIFF/126/034/2019/03/15/LC81260342019074LGN00_NDVI.tiff
+                 * 需要对SR的路径进行操作，将其改变为资源发布的URL
+                 * */
+
+                String url = pathConfigs.staticResourcePrefix + outputDataGranule.getDataGranulePath();
+                dataGranuleRepository.save(outputDataGranule.setDataGranuleUri(url));
                 dataGranule = outputDataGranule;
             }
             result.add(dataGranule);

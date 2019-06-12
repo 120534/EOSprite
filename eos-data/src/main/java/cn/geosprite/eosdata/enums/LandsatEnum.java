@@ -10,9 +10,11 @@ import lombok.Getter;
  */
 @Getter
 public enum LandsatEnum implements DataEnum {
+    /***/
     LANDSAT8_SENSOR("LC08","Landsat-8"),
     LANDSAT8_NDVI("L1TP_C1_T1_NDVI","归一化植被指数(NDVI)"),
-    LANDSAT8_NDWI("L1TP_C1_T1_NDWI","归一化水体指数(NDWI)")
+    LANDSAT8_NDWI("L1TP_C1_T1_NDWI","归一化水体指数(NDWI)"),
+    LANDSAT8_SR("L1TP_C1_T1_SR","地表反射率(SR)")
     ;
 
     private String code;

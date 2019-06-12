@@ -7,9 +7,11 @@ package cn.geosprite.eosdata.enums;
  * @ Modified By：
  */
 public enum OrderEnum implements DataEnum {
+    /***/
     LANDSAT8_SENSOR("Landsat-8","LC8"),
     LANDSAT8_NDVI("L1TP_C1_T1_NDVI","归一化植被指数(NDVI)"),
-    LANDSAT8_NDWI("L1TP_C1_T1_NDWI","归一化水体指数(NDWI)")
+    LANDSAT8_NDWI("L1TP_C1_T1_NDWI","归一化水体指数(NDWI)"),
+    LANDSAT8_SR("L1TP_C1_T1_SR","地表反射率(SR)")
     ;
 
     private String name;
