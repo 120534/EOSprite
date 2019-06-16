@@ -112,9 +112,11 @@ public class OrderInputDTO {
             String productName = orderInputDTO.getDataProductName();
             String sensorName = orderInputDTO.getDataSensorName();
 
-            // TODO:需要判断是哪种影像
-            LandsatEnum product= LandsatEnum.fromName(productName);
+            // TODO:需要通过sensor判断是哪种影像，在进行后面数据产品名称的匹配。
+            //  目前只设计了Landsat8就免去了这一步操作
             LandsatEnum sensor= LandsatEnum.fromName(sensorName);
+
+            LandsatEnum product= LandsatEnum.fromName(productName);
             Integer startPath = orderInputDTO.getStartPath();
             Integer endPath = orderInputDTO.getEndPath();
             Integer startRow = orderInputDTO.getStartRow();

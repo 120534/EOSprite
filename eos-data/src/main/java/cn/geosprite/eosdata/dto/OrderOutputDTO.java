@@ -9,7 +9,7 @@ import org.springframework.beans.BeanUtils;
 /**
  * @ Author     ：wanghl
  * @ Date       ：Created in 14:29 2019-4-25
- * @ Description：由Order对象转换得到，用于前端显示的
+ * @ Description：由Order对象转换得到，用于前端Orders.HTML主页面显示的
  * @ Modified By：
  */
 @Data

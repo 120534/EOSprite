@@ -73,7 +73,6 @@ public class DataGranuleOutputDTO {
             throw new AssertionError("DataGranuleOutputDTO.doForward is not available");
         }
 
-        //TODO :测试方法
         @Override
         public DataGranuleOutputDTO doBackward(DataGranule dataGranule) {
             DataGranuleOutputDTO dataGranuleOutputDTO = new DataGranuleOutputDTO();

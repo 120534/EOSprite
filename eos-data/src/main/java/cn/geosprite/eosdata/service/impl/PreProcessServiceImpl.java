@@ -69,7 +69,7 @@ public class PreProcessServiceImpl implements PreProcessService {
             /**
              *  判断其类型为TGZ的对其进行解压，其他类型不做处理。
              */
-            if (formatCode.equalsIgnoreCase("TGZ")) {
+            if ("TGZ".equalsIgnoreCase(formatCode)) {
 
                 File destination = new File(outputPath);
                 File source = new File(inputPath);

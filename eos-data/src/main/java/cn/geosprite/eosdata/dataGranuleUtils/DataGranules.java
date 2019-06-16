@@ -72,7 +72,7 @@ public class DataGranules {
         String srcId = dataGranule.getDataGranuleId();
         String srcProductCode = dataGranule.getProductCode();
         String srcDataFormat = dataGranule.getFormatCode();
-        return srcId.replace(srcDataFormat,fc.getFormat()).replace(srcProductCode, fc.getProductCode());
+        return srcId.replace(srcDataFormat, fc.getFormat()).replace(srcProductCode, fc.getProductCode());
     }
 
     /** 生成path，这个path转换包括三种情况，TGZ -> DIR , DIR -> SR , SR -> (NDVI, ALBEDO, etc...)

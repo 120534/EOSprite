@@ -42,14 +42,4 @@ public class ProcessController {
      return processService.process(orderId);
 
     }
-
-    @GetMapping("/test")
-    @ResponseBody
-    private OrderStatus test(@RequestParam Integer orderId){
-
-        return  new OrderStatus()
-                .setMessage("处理完成")
-                .setOrderCompletedTime(new Timestamp(System.currentTimeMillis()));
-
-    }
 }

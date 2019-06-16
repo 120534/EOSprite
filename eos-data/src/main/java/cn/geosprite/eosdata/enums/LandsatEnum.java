@@ -10,11 +10,21 @@ import lombok.Getter;
  */
 @Getter
 public enum LandsatEnum implements DataEnum {
-    /***/
+    /**
+     * productCode -> name
+     * 用于前端的匹配
+     * */
+    /**配对数据集类型*/
     LANDSAT8_SENSOR("LC08","Landsat-8"),
+    /**匹配前端，将前端请求的“归一化植被指数(NDVI)”转化为 “L1TP_C1_T1_NDVI”
+     * 将后端存储的“L1TP_C1_T1_NDVI”返回前段时转化为 “归一化植被指数(NDVI)”
+     * */
     LANDSAT8_NDVI("L1TP_C1_T1_NDVI","归一化植被指数(NDVI)"),
     LANDSAT8_NDWI("L1TP_C1_T1_NDWI","归一化水体指数(NDWI)"),
-    LANDSAT8_SR("L1TP_C1_T1_SR","地表反射率(SR)")
+    LANDSAT8_SR("L1TP_C1_T1_SR","地表反射率(SR)"),
+    /***/
+    LANDSAT8_KMEANS("L1TP_C1_T1_SR","非监督分类(K-Means)"),
+    LANDSAT8_DDI("L1TP_C1_T1_SR","荒漠化信息提取模型(Albedo-NDVI)")
     ;
 
     private String code;

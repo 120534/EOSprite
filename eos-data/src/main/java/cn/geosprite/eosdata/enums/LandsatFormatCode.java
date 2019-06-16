@@ -10,8 +10,12 @@ import lombok.Getter;
  */
 @Getter
 public enum LandsatFormatCode implements CodeEnum {
-    /**
+
+    /**这个Enum存储了数据的模型，以及其对应的格式
+     * 每一个数据产品都有一个对应的数据格式
      * TGZ表示原始数据，Format对应
+     * productCode -> format
+     * 用于后端存储，
      */
     TGZ("TGZ","L1TP_C1_T1"),
     //DIR means unzipped

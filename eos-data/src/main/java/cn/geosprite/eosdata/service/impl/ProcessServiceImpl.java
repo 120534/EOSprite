@@ -7,21 +7,19 @@ import cn.geosprite.eosdata.dataGranuleUtils.DataGranules;
 import cn.geosprite.eosdata.dto.OrderStatus;
 import cn.geosprite.eosdata.entity.DataGranule;
 import cn.geosprite.eosdata.entity.Orders;
+import cn.geosprite.eosdata.enums.LandsatEnum;
 import cn.geosprite.eosdata.enums.LandsatFormatCode;
-import cn.geosprite.eosdata.enums.OrderEnum;
 import cn.geosprite.eosdata.enums.OrderStatusEnum;
 import cn.geosprite.eosdata.service.ProcessService;
 import cn.geosprite.eosprocess.service.LasrcService;
 import cn.geosprite.eosprocess.service.BandMathService;
 import lombok.extern.slf4j.Slf4j;
-import monocle.std.list;
+import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import spire.algebra.Bool;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -61,12 +59,10 @@ public class ProcessServiceImpl implements ProcessService {
 
     @Override
     public List<DataGranule> doSR(List<DataGranule> dataGranules) {
-
         //返回已经做过大气校正的dataGranule信息
         List<DataGranule> result = new ArrayList<>();
         //确保所有数据都在本地且已经解压
         List<DataGranule> dirDataGranule = preProcessService.extractFiles(dataGranules);
-
         for (DataGranule dataGranule: dirDataGranule){
             DataGranule outputDataGranule = DataGranules.converter(dataGranule, LandsatFormatCode.SR);
 
@@ -209,11 +205,13 @@ public class ProcessServiceImpl implements ProcessService {
             }
         }
 
+        // TODO:测试判断条件，在数据全部为RAW的时候，数据处理完返回的状态为取消,
+        //  抽象一个模式匹配的方法，实现方法名可扩展，同时添加SR的计算。
         /**如果都处理过则不用进行处理，直接返回结果*/
         if (raw.size() != 0){
             /**创建一个集合，接受处理后的数据*/
             List<DataGranule> list;
-            //根据productName进行判断，调用哪个方法处理数据
+            //根据productName进行判断，调用哪个方法处理数据 case
             if (productName.equalsIgnoreCase(LandsatFormatCode.NDVI_TIFF.getProductCode())){
                 list = doNDVI(raw);
             }else if (productName.equalsIgnoreCase(LandsatFormatCode.NDWI_TIFF.getProductCode())){
@@ -221,6 +219,31 @@ public class ProcessServiceImpl implements ProcessService {
             }else {
                 throw new RuntimeException("no method existing for " + productName);
             }
+
+            /**
+             * 根据订单提交的计算模型，匹配对应的计算方法
+             * 目前考虑直接使用模式匹配
+             * 1. 读取order里面的信息，拿到order.
+             * TODO 这里需要考虑使用哪个Enum，或许使用LandsatEnum更合适
+             * */
+
+            LandsatEnum code = LandsatEnum.fromCode(productName);
+
+            assert code != null;
+            switch (code){
+                case LANDSAT8_SR:
+                    System.out.println("");
+                    break;
+                case LANDSAT8_NDVI:
+                    System.out.println("");
+                    break;
+                case LANDSAT8_NDWI:
+                    System.out.println("");
+                    break;
+                default:
+                    throw new IllegalStateException("Unexpected value: " + productName);
+            }
+
             /**把处理后的dataGranule信息并入product集合中，这个集合包含了全部处理过的数据信息*/
             list.addAll(product);
 
@@ -230,7 +253,7 @@ public class ProcessServiceImpl implements ProcessService {
             List<DataGranule>  list3 = list.stream().filter(x -> x.getDataGranuleUri() == null).collect(Collectors.toList());
 
             /**list4包含处理成功的数据*/
-            List<DataGranule>  list4 = list.stream().filter(x -> x.getDataGranuleUri()!= null).collect(Collectors.toList());
+            //List<DataGranule>  list4 = list.stream().filter(x -> x.getDataGranuleUri()!= null).collect(Collectors.toList());
 
             /**添加时间戳到Order表中，同时返回到前端*/
             Timestamp timestamp = new Timestamp(System.currentTimeMillis());
@@ -239,14 +262,14 @@ public class ProcessServiceImpl implements ProcessService {
             ordersRepository.updateOrderFinish(orderId,timestamp, OrderStatusEnum.FINISHED.getCode());
 
             OrderStatus orderStatus ;
-            if (list4.size()==0){
+            if (list3.size()!=0){
                 orderStatus = new OrderStatus()
-                        .setMessage(OrderStatusEnum.FINISHED.getMessage())
+                        .setMessage(OrderStatusEnum.ERROR.getMessage())
+                        .setDataGranuleList(list3)
                         .setOrderCompletedTime(timestamp);
             }else {
                 orderStatus = new OrderStatus()
-                        .setMessage(OrderStatusEnum.CANCEL.getMessage())
-                        .setDataGranuleList(list3)
+                        .setMessage(OrderStatusEnum.FINISHED.getMessage())
                         .setOrderCompletedTime(timestamp);
             }
             return orderStatus;
@@ -258,5 +281,7 @@ public class ProcessServiceImpl implements ProcessService {
             return new OrderStatus().setOrderCompletedTime(timestamp)
                     .setMessage(OrderStatusEnum.FINISHED.getMessage());
         }
+
+
     }
 }
