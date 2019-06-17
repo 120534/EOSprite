@@ -1,20 +1,15 @@
 package cn.geosprite.eosprocess.service
 
-import java.io.File
-
 import astraea.spark.rasterframes._
-import cn.geosprite.eosprocess.utils.Utils
 import geotrellis.raster.io.geotiff.SinglebandGeoTiff
 import org.apache.spark.SparkContext
-import org.apache.spark.sql.{ColumnName, SparkSession}
+import org.apache.spark.sql.{ColumnName, DataFrame, SparkSession}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import cn.geosprite.eosprocess.utils.Utils._
 import geotrellis.raster.render.ColorMap
-import lombok.extern.slf4j.Slf4j
-import org.slf4j.Logger
-
-import scala.tools.nsc.io.Path
+import cn.geosprite.eosprocess.index.Indexes._
+import geotrellis.raster.{MultibandTile, Tile}
 
 /**
   * @ Author     ：wanghl
@@ -53,6 +48,54 @@ class BandMathService {
     doNDIndex(inputPath, bandNums, outputPathPng, outputPathTiff, ndwi_colorMap)
   }
 
+  def doTrueColorComposite(inputPath: String): String={
+    val arr = findTiffPath(inputPath)
+
+    /**各波段影像的路径*/
+    val red = arr.apply(4)
+    val green = arr.apply(3)
+    val blue = arr.apply(2)
+
+    val redTiff = SinglebandGeoTiff(red)
+    val extent = redTiff.extent
+    val crs = redTiff.crs
+
+    val redTile = redTiff.tile
+    val greenTile = SinglebandGeoTiff(green).tile
+    val blueTile = SinglebandGeoTiff(blue).tile
+
+    val arrPng = inputPath.split("/")
+    val previewName = arrPng.last + ".png"
+    val previewPath = arrPng.take(arrPng.length - 1).mkString("/") + "/" + previewName
+
+    MultibandTile(redTile, greenTile, blueTile).equalize().mapBands((i: Int, tile:Tile) => {
+      tile.rescale(0, 255)
+    }).renderPng().write(previewPath)
+    previewPath
+  }
+
+  //归一化建筑指数  (MIR-NIR)/(MIR+NIR)
+  def doNDBI(): Unit ={
+
+  }
+  //  def getTGSI(blue:Tile,green:Tile,red:Tile): Unit ={
+  //    (red - blue)/(red + blue + green)
+  //  }
+  def doTGSI(): Unit ={
+
+
+  }
+  //  def getMSAVI(red:Tile,nir:Tile):Tile = {
+  //    (nir * 2 + 1 - Abs(Sqrt((nir * 2 + 1) * (nir * 2 + 1) - (nir - red) * 8))) / 2
+  //    //  （2*float(b5)+1-abs(sqrt((2*float(b5)+1)*(2*float(b5)+1)-8*(float(b5)-float(b4))))/2
+  //  }
+  def doMSAVI(): Unit ={
+
+  }
+
+  def doAlbedo(rasterFrame: RasterFrame,list: List[ColumnName]):Unit ={
+  }
+
   /**
     *a common method to get normal difference index,suitable for XXX = (band(x) - band(y)) / (band(x) + band(y))
     * @Param band(Int, Int), the first param is for the head band, and the second param is for the second band
@@ -82,8 +125,10 @@ class BandMathService {
     val metadata = joinedRF.tileLayerMetadata.left.get
     val tlm = metadata.tileLayout
 
-    val cn1:ColumnName = new ColumnName(StringContext("band_","").s(bandNums.head))
-    val cn2:ColumnName = new ColumnName(StringContext("band_","").s(bandNums.last))
+    val bands:List[ColumnName] = bandNums.map(toColumn)
+
+    val cn1:ColumnName = bands.head
+    val cn2:ColumnName = bands.last
 
     val rf = joinedRF.withColumn("index",
       normalized_difference(convert_cell_type(cn1, "float32"),
@@ -110,22 +155,4 @@ class BandMathService {
     SinglebandGeoTiff(raster, metadata.extent, metadata.crs).write(outputPathTiff)
 
   }
-
-  //归一化建筑指数  (MIR-NIR)/(MIR+NIR)
-  def doNDBI(): Unit ={
-
-
-  }
-//  def getTGSI(blue:Tile,green:Tile,red:Tile): Unit ={
-//    (red - blue)/(red + blue + green)
-//  }
-  def doTGSI()={}
-
-//  def getMSAVI(red:Tile,nir:Tile):Tile = {
-//    (nir * 2 + 1 - Abs(Sqrt((nir * 2 + 1) * (nir * 2 + 1) - (nir - red) * 8))) / 2
-//    //  （2*float(b5)+1-abs(sqrt((2*float(b5)+1)*(2*float(b5)+1)-8*(float(b5)-float(b4))))/2
-//  }
-  def doMSAVI(){}
-
-
 }

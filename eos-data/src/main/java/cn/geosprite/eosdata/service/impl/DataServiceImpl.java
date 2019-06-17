@@ -208,8 +208,6 @@ public class DataServiceImpl implements DataService {
         return orders.getOrderCompletedTime()!= null;
     }
 
-
-
     /**
      * 根据order 返回对应订单对应的所有原始dataGranule信息
      * @param orders

@@ -7,6 +7,7 @@ import com.typesafe.config.ConfigFactory
 import geotrellis.raster.io.geotiff.SinglebandGeoTiff
 import geotrellis.raster.render.ColorMap
 import javax.imageio.ImageIO
+import org.apache.spark.sql.ColumnName
 
 /**
   * @ Author     ：wanghl
@@ -20,6 +21,7 @@ object Utils {
 
   val ndvi_colorMap:ColorMap = ColorMap.fromStringDouble(ConfigFactory.load().getString("colorMap.ndvi")).get
   val ndwi_colorMap:ColorMap = ColorMap.fromStringDouble(ConfigFactory.load().getString("colorMap.ndwi")).get
+  val ddi_colorMap:ColorMap = ColorMap.fromString(ConfigFactory.load().getString("colorMap.ndwi")).get
 
   //设置输出路径
   //  path: /mnt/disk1/geodata/lc8/ndvi/117/043/LC81170432018184LGN00 t: tif
@@ -83,11 +85,15 @@ object Utils {
     aerosol ++ pair.sortBy(_._2).map(_._1)
   }
 
-
   def mkdir(dir: String): Unit = {
     val folder = new File(dir)
     if (!folder.exists() && !folder.isDirectory) {
       folder.mkdirs()
     }
   }
+
+  def toColumn(str: Int):ColumnName = {
+    new ColumnName(StringContext("band_","").s(str))
+  }
+
 }

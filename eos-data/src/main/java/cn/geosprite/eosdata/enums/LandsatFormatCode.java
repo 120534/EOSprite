@@ -24,7 +24,10 @@ public enum LandsatFormatCode implements CodeEnum {
     NDVI_TIFF("TIFF","L1TP_C1_T1_NDVI"),
     NDVI_PNG("PNG","L1TP_C1_T1_NDVI"),
     NDWI_TIFF("TIFF","L1TP_C1_T1_NDWI"),
-    NDWI_PNG("PNG","L1TP_C1_T1_NDWI")
+    NDWI_PNG("PNG","L1TP_C1_T1_NDWI"),
+    /**DDI based on Albedo-NDVI*/
+    DDIAN_TIFF("TIFF","L1TP_C1_T1_DDIAN"),
+    DDIAN_PNG("PNG","L1TP_C1_T1_DDIAN")
     ;
 
     private String format;

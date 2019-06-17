@@ -14,7 +14,6 @@ import cn.geosprite.eosdata.service.ProcessService;
 import cn.geosprite.eosprocess.service.LasrcService;
 import cn.geosprite.eosprocess.service.BandMathService;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -85,13 +84,18 @@ public class ProcessServiceImpl implements ProcessService {
 
                 /**
                  *
+                 * 如：
                  * http://192.168.14.212/LC08/L1TP_C1_T1_NDVI/PNG/113/026/2018/12/30/LC81130262018364LGN00.PNG
                  * LC08/L1TP_C1_T1_NDVI/TIFF/126/034/2019/03/15/LC81260342019074LGN00_NDVI.tiff
                  * 需要对SR的路径进行操作，将其改变为资源发布的URL
                  * */
 
-                String url = pathConfigs.staticResourcePrefix + outputDataGranule.getDataGranulePath();
-                dataGranuleRepository.save(outputDataGranule.setDataGranuleUri(url));
+                String downloadURL = pathConfigs.staticResourcePrefix + outputDataGranule.getDataGranulePath();
+
+                String previewPath = bandMathService.doTrueColorComposite(outputPath);
+                String previewURL = pathConfigs.staticResourcePrefix + previewPath;
+
+                dataGranuleRepository.save(outputDataGranule.setDataGranuleUri(downloadURL).setDataGranulePreview(previewURL));
                 dataGranule = outputDataGranule;
             }
             result.add(dataGranule);
@@ -154,6 +158,7 @@ public class ProcessServiceImpl implements ProcessService {
 
                 //getNdvi应该设置处理多幅影像
                 bandMathService.doNDWI(inputPath, pngPath, tiffPath);
+
 
                 /**
                  *这里的PNG不在单独存储到dataGranule表中了，处理完后，更新dataGranulePreview，直接给定链接。
@@ -232,16 +237,22 @@ public class ProcessServiceImpl implements ProcessService {
             assert code != null;
             switch (code){
                 case LANDSAT8_SR:
-                    System.out.println("");
+                    list = doSR(raw);
                     break;
                 case LANDSAT8_NDVI:
-                    System.out.println("");
+                    list = doNDVI(raw);
                     break;
                 case LANDSAT8_NDWI:
-                    System.out.println("");
+                    list = doNDWI(raw);
+                    break;
+                case LANDSAT8_KMEANS:
+//                   list = doKMEANS();
+                    break;
+                case LANDSAT8_DDI:
+//                   list = doDDI();
                     break;
                 default:
-                    throw new IllegalStateException("Unexpected value: " + productName);
+                    throw new IllegalStateException("Unexpected productName: " + productName);
             }
 
             /**把处理后的dataGranule信息并入product集合中，这个集合包含了全部处理过的数据信息*/
