@@ -58,8 +58,22 @@ public class ProcessServiceImpl implements ProcessService {
 
     @Override
     public List<DataGranule> doSR(List<DataGranule> dataGranules) {
+
+        /**判断数据是否已经做过大气校正, 如果做过大气校正，那么直接使用大气校正后的数据集
+         *
+         *  判断条件
+         *  1. 数据的ID存在
+         *  2. 数据的URI不为空
+         *
+         *  满足此条件，那么将查询到的数据直接放到结果集中，不进行解压和大气校正。
+         *  不满足此条件，进行大气校正和解压缩
+         * */
+
+        ArrayList<DataGranule> raw = null;
+        ArrayList<DataGranule> product = null;
         //返回已经做过大气校正的dataGranule信息
         List<DataGranule> result = new ArrayList<>();
+
         //确保所有数据都在本地且已经解压
         List<DataGranule> dirDataGranule = preProcessService.extractFiles(dataGranules);
         for (DataGranule dataGranule: dirDataGranule){
@@ -92,8 +106,8 @@ public class ProcessServiceImpl implements ProcessService {
 
                 String downloadURL = pathConfigs.staticResourcePrefix + outputDataGranule.getDataGranulePath();
 
-                String previewPath = bandMathService.doTrueColorComposite(outputPath);
-                String previewURL = pathConfigs.staticResourcePrefix + previewPath;
+                String previewName = bandMathService.doTrueColorComposite(outputPath);
+                String previewURL = pathConfigs.staticResourcePrefix + outputDataGranule.getDataGranulePath()+ "/" + previewName;
 
                 dataGranuleRepository.save(outputDataGranule.setDataGranuleUri(downloadURL).setDataGranulePreview(previewURL));
                 dataGranule = outputDataGranule;
@@ -215,16 +229,7 @@ public class ProcessServiceImpl implements ProcessService {
         /**如果都处理过则不用进行处理，直接返回结果*/
         if (raw.size() != 0){
             /**创建一个集合，接受处理后的数据*/
-            List<DataGranule> list;
-            //根据productName进行判断，调用哪个方法处理数据 case
-            if (productName.equalsIgnoreCase(LandsatFormatCode.NDVI_TIFF.getProductCode())){
-                list = doNDVI(raw);
-            }else if (productName.equalsIgnoreCase(LandsatFormatCode.NDWI_TIFF.getProductCode())){
-                list = doNDWI(raw);
-            }else {
-                throw new RuntimeException("no method existing for " + productName);
-            }
-
+            List<DataGranule> list = null;
             /**
              * 根据订单提交的计算模型，匹配对应的计算方法
              * 目前考虑直接使用模式匹配
@@ -256,7 +261,9 @@ public class ProcessServiceImpl implements ProcessService {
             }
 
             /**把处理后的dataGranule信息并入product集合中，这个集合包含了全部处理过的数据信息*/
+            assert list != null;
             list.addAll(product);
+            list.addAll(raw);
 
             /**异常处理，后期再修改把，这里只是判断了URI是否为空，将其分为处理遇到异常，或者处理完成*/
 
@@ -264,7 +271,7 @@ public class ProcessServiceImpl implements ProcessService {
             List<DataGranule>  list3 = list.stream().filter(x -> x.getDataGranuleUri() == null).collect(Collectors.toList());
 
             /**list4包含处理成功的数据*/
-            //List<DataGranule>  list4 = list.stream().filter(x -> x.getDataGranuleUri()!= null).collect(Collectors.toList());
+            List<DataGranule>  list4 = list.stream().filter(x -> x.getDataGranuleUri()!= null).collect(Collectors.toList());
 
             /**添加时间戳到Order表中，同时返回到前端*/
             Timestamp timestamp = new Timestamp(System.currentTimeMillis());
@@ -273,12 +280,14 @@ public class ProcessServiceImpl implements ProcessService {
             ordersRepository.updateOrderFinish(orderId,timestamp, OrderStatusEnum.FINISHED.getCode());
 
             OrderStatus orderStatus ;
-            if (list3.size()!=0){
+            if (list3.size() != 0){
                 orderStatus = new OrderStatus()
                         .setMessage(OrderStatusEnum.ERROR.getMessage())
                         .setDataGranuleList(list3)
                         .setOrderCompletedTime(timestamp);
-            }else {
+                //TODO : 这里的判断条件也有问题，数据命名pr。
+            }
+            else {
                 orderStatus = new OrderStatus()
                         .setMessage(OrderStatusEnum.FINISHED.getMessage())
                         .setOrderCompletedTime(timestamp);

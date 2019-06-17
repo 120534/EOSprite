@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import cn.geosprite.eosprocess.utils.Utils._
 import geotrellis.raster.render.ColorMap
-import cn.geosprite.eosprocess.index.Indexes._
 import geotrellis.raster.{MultibandTile, Tile}
 
 /**
@@ -49,6 +48,7 @@ class BandMathService {
   }
 
   def doTrueColorComposite(inputPath: String): String={
+    log.info("开始进行真彩色合成 = {}", inputPath)
     val arr = findTiffPath(inputPath)
 
     /**各波段影像的路径*/
@@ -66,12 +66,13 @@ class BandMathService {
 
     val arrPng = inputPath.split("/")
     val previewName = arrPng.last + ".png"
-    val previewPath = arrPng.take(arrPng.length - 1).mkString("/") + "/" + previewName
+    val previewPath = arrPng.mkString("/") + "/" + previewName
 
     MultibandTile(redTile, greenTile, blueTile).equalize().mapBands((i: Int, tile:Tile) => {
       tile.rescale(0, 255)
     }).renderPng().write(previewPath)
-    previewPath
+    log.info("真彩色合成已经完成，输出路径 = {}", previewPath)
+    previewName
   }
 
   //归一化建筑指数  (MIR-NIR)/(MIR+NIR)

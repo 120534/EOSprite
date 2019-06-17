@@ -158,12 +158,9 @@ public class DataGranules {
 
     public static DataGranule converterForward(DataGranule dataGranule, LandsatFormatCode fc){
         String oldId = dataGranule.getDataGranuleId();
-        String oldFormat = dataGranule.getFormatCode();
-        String oldProduct = dataGranule.getProductCode();
         String oldPath = dataGranule.getDataGranulePath();
 
         String newId = convertId(dataGranule,fc);
-        String newFormat = fc.getFormat();
         String newProduct = fc.getProductCode();
 
         /**On Arrays.asList returning a fixed-size list*/
@@ -180,7 +177,12 @@ public class DataGranules {
 
         String newName = dataName + "_" + type.get(type.size()-1) + "." + fc.getFormat().toLowerCase();
 
-        String newPath = oldPath.replace(oldId, newId).replace(name, newName);
+        String newPath;
+        if (!fc.equals(LandsatFormatCode.SR)){
+            newPath = oldPath.replace(oldId, newId).replace(name, newName);
+        }else {
+            newPath = newId + "/" + dataName;
+        }
 
         return new DataGranule()
                 .setDataGranuleId(newId)
@@ -193,4 +195,45 @@ public class DataGranules {
                 .setSceneDate(dataGranule.getSceneDate());
     }
 
+    /**
+     * 这个convertForwardDir不适用于
+     *  LC08/L1TP_C1_T1/TGZ/113/023/2018/01/12		L1TP_C1_T1		TGZ		LC08/L1TP_C1_T1/TGZ/113/023/2018/01/12/LC81130232018012LGN00.tgz
+     *   LC08/L1TP_C1_T1_SR/TIFF/117/043/2018/03/29		L1TP_C1_T1_SR		TIFF		LC08/L1TP_C1_T1_SR/TIFF/117/043/2018/03/29/LC81170432018088LGN00
+     * */
+    public static DataGranule converterForwardDIR(DataGranule dataGranule, LandsatFormatCode fc){
+        //得到旧的id -> LC08/L1TP_C1_T1/TGZ/113/023/2018/01/12
+        String oldId = dataGranule.getDataGranuleId();
+        //得到旧的path -> LC08/L1TP_C1_T1/TGZ/113/023/2018/01/12/LC81130232018012LGN00.tgz
+        String oldPath = dataGranule.getDataGranulePath();
+
+        // 新的id -> LC08/L1TP_C1_T1_SR/TIFF/117/043/2018/03/29
+        String newId = convertId(dataGranule, fc);
+        // 新的productCode -> L1TP_C1_T1_SR
+        String newProduct = fc.getProductCode();
+
+        /**On Arrays.asList returning a fixed-size list*/
+        List<String> list = Splitter.on("/").trimResults().omitEmptyStrings().splitToList(oldPath);
+        /**获取到数据的名称 LC81130232018012LGN00.tgz*/
+        String name = list.get(list.size() - 1);
+        /**得到LC81130232018012LGN00*/
+        List<String> names = Splitter.on(".").trimResults().omitEmptyStrings().splitToList(name);
+        String dataName = names.get(0);
+
+        String  newPath = newId + "/" + dataName;
+
+        /**
+         * TODO：添加判断生成的结果是否为单个文件还是一个文件夹
+         * switch case
+         * */
+
+        return new DataGranule()
+                .setDataGranuleId(newId)
+                .setProductCode(newProduct)
+                .setDataGranulePath(newPath)
+                .setTileCode(dataGranule.getTileCode())
+                .setDataSource(dataGranule.getDataSource())
+                .setFormatCode(fc.getFormat())
+                .setSensorCode(dataGranule.getSensorCode())
+                .setSceneDate(dataGranule.getSceneDate());
+    }
 }
