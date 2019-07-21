@@ -68,7 +68,7 @@ public class DataGranules {
     }
 
 
-    private static String convertId(DataGranule dataGranule, LandsatFormatCode fc){
+    static String convertId(DataGranule dataGranule, LandsatFormatCode fc){
         String srcId = dataGranule.getDataGranuleId();
         String srcProductCode = dataGranule.getProductCode();
         String srcDataFormat = dataGranule.getFormatCode();
@@ -199,6 +199,7 @@ public class DataGranules {
      * 这个convertForwardDir不适用于
      *  LC08/L1TP_C1_T1/TGZ/113/023/2018/01/12		L1TP_C1_T1		TGZ		LC08/L1TP_C1_T1/TGZ/113/023/2018/01/12/LC81130232018012LGN00.tgz
      *   LC08/L1TP_C1_T1_SR/TIFF/117/043/2018/03/29		L1TP_C1_T1_SR		TIFF		LC08/L1TP_C1_T1_SR/TIFF/117/043/2018/03/29/LC81170432018088LGN00
+     *  TODO:与converter功能一致。考虑是否删除。
      * */
     public static DataGranule converterForwardDIR(DataGranule dataGranule, LandsatFormatCode fc){
         //得到旧的id -> LC08/L1TP_C1_T1/TGZ/113/023/2018/01/12

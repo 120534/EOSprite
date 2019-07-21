@@ -57,6 +57,7 @@ public class PreProcessServiceImpl implements PreProcessService {
         List<DataGranule> result = new ArrayList<>();
 
         for (DataGranule dataGranule : dataGranules) {
+
             //获取数据读取路径
             String inputPath = pathConfigs.inputPath + dataGranule.getDataGranulePath();
             DataGranule outputDataGranule = DataGranules.converter(dataGranule, LandsatFormatCode.DIR);

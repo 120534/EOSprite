@@ -58,7 +58,7 @@
             <div class="tab-content">
                 <form method="post" action="/data/postOrder">
                     <div class="vis-selector">
-                        <label>遥感数据集</label>
+                        <label>遥感数据集:</label>
                         <select id="select-dataSet" name="dataSensorName">
                             <option selected disabled>请选择</option>
                             <option>Landsat-8</option>
@@ -67,12 +67,13 @@
                         </select>
                     </div>
                     <div class="vis-selector">
-                        <label>遥感模型</label>
+                        <label>遥感模型:</label>
                         <select id="select-product" name="dataProductName">
                             <option selected disabled>请选择</option>
                             <option>归一化植被指数(NDVI)</option>
                             <option>归一化水体指数(NDWI)</option>
                             <option>地表反射率(SR)</option>
+                            <option>荒漠化信息提取模型(Albedo-NDVI)</option>
                         </select>
                     </div>
                     <div>

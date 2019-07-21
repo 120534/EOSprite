@@ -21,7 +21,16 @@ object Utils {
 
   val ndvi_colorMap:ColorMap = ColorMap.fromStringDouble(ConfigFactory.load().getString("colorMap.ndvi")).get
   val ndwi_colorMap:ColorMap = ColorMap.fromStringDouble(ConfigFactory.load().getString("colorMap.ndwi")).get
-  val ddi_colorMap:ColorMap = ColorMap.fromStringDouble(ConfigFactory.load().getString("colorMap.ndwi")).get
+  /**    荒漠化分为五类 【无荒漠化、轻度荒漠化、中度荒漠化、重度荒漠化、极重度荒漠化】
+    *     无荒漠化 ： #c4e6c3   196,230,195     4
+    *     轻度荒漠化：#ffdd9a    255,221,154   3
+    *     中度荒漠化：#ffa679     255,166,121  2
+    *     重度荒漠化：#a65461ff   166,84,97  1
+    *     极重度荒漠化：#541f3fff  84,31,63 0
+    *     沙地：#ffff00ff      255,255,0     200
+    *     水系：#1e90ff             220
+    * */
+  val ddi_colorMap:ColorMap = ColorMap.fromString("0:541f3fff;1:a65461ff;2:ffa679ff;3:ffdd9aff;4:c4e6c3ff;200:ffff00ff;").get
 
   //设置输出路径
   //  path: /mnt/disk1/geodata/lc8/ndvi/117/043/LC81170432018184LGN00 t: tif
@@ -94,6 +103,27 @@ object Utils {
 
   def toColumn(str: Int):ColumnName = {
     new ColumnName(StringContext("band_","").s(str))
+  }
+
+  /**
+    * 由于Kmeans非监督分类，预测后类的并不是按照原始数据值的大小来划分，而是根据聚类中心的排序。
+    * */
+  def centerToIndex (arr:Array[Double]): Map[Int, Int] ={
+    /**
+      * 原始的位置： 0, 1, 2, 3, 4, 5
+      *
+      * */
+    /**得到每个cluster center对应的prediction值*/
+    val res = arr.zipWithIndex.sortWith(_._1 < _._1)
+
+    /**将每个prediction值改为按照cluster center的值从小到大排列
+      * 这个map的结果，key为原始值，value为从下到大排列值。
+      * */
+    val result = res.map(_._2).zipWithIndex.toMap
+    arr.foreach(x => print(x + ", "))
+    println("-------------------------------------------------------------")
+    result.foreach{case (k:Int, y:Int) => println("original: " + k + " => " + "result: "+ y  )}
+    result
   }
 
 }

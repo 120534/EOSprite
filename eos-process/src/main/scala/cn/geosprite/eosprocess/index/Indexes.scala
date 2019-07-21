@@ -29,7 +29,7 @@ object Indexes {
   })
 
   /**
-    * description:
+    * description: 修正的土壤调节植被指数
     * created time:  2018/11/5
     *
     *  params [red, nir]
@@ -71,14 +71,9 @@ object Indexes {
    *  params
    * @return
    */
-  val sandIndex:UserDefinedFunction = udf((tile: List[Tile]) => {
-    if (tile.length != 7){
-      throw new Exception(s"tile length for calculate sandIndex must ${tile.length}")
-    }
-    val tile1 = tile.head
-    val tileRest = tile.drop(0)
-    val sum = tileRest.foldLeft(tile1)(_+_)
-    sum
+
+  val sand: UserDefinedFunction = udf((b2: Tile, b3: Tile, b4: Tile, b5: Tile, b6: Tile, b7: Tile) => {
+    b2 + b3 + b4 + b5 + b6 + b7
   })
 
   /**

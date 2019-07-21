@@ -32,10 +32,6 @@ public class ProcessServiceImplTest {
     @Test
     public void unzip() {
         List<DataGranule> list = dataService.findDataGranulesByOrderId(3);
-        List<DataGranule> list2 = processService.unzip(list);
 
-        for (DataGranule dataGranule : list2){
-            System.out.println(dataGranule.toString());
-        }
     }
 }
